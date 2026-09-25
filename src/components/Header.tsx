@@ -1,4 +1,5 @@
 import { applicants, landlords, listings } from '../data/seed'
+import { tr } from '../lib/i18n'
 import { navigate } from '../lib/router'
 import { useStore } from '../lib/store'
 import type { Role } from '../types'
@@ -25,12 +26,12 @@ export function Header({ path }: { path: string }) {
   }
 
   const tenantLinks = [
-    { to: '/', label: 'Explorar' },
-    { to: '/aplicaciones', label: 'Mis aplicaciones' },
+    { to: '/', label: tr('Explore', 'Explorar') },
+    { to: '/aplicaciones', label: tr('My applications', 'Mis aplicaciones') },
   ]
   const landlordLinks = [
-    { to: '/propietario', label: 'Aplicantes' },
-    { to: '/propietario/flujo', label: 'Flujo de caja' },
+    { to: '/propietario', label: tr('Applicants', 'Aplicantes') },
+    { to: '/propietario/flujo', label: tr('Cash flow', 'Flujo de caja') },
   ]
   const links = s.role === 'arrendatario' ? tenantLinks : landlordLinks
   const isActive = (to: string) => {
@@ -59,7 +60,20 @@ export function Header({ path }: { path: string }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="flex rounded-full bg-stone-100 p-1 text-xs font-bold sm:text-sm" role="tablist" aria-label="Cambiar rol">
+          <div className="flex rounded-full border border-stone-200 p-0.5 text-[11px] font-bold sm:text-xs" role="group" aria-label={tr('Language', 'Idioma')}>
+            {(['en', 'es'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => s.setLang(l)}
+                aria-pressed={s.lang === l}
+                title={l === 'en' ? 'English' : 'Español'}
+                className={`rounded-full px-2 py-1 transition ${s.lang === l ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-800'}`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div className="flex rounded-full bg-stone-100 p-1 text-xs font-bold sm:text-sm" role="tablist" aria-label={tr('Switch role', 'Cambiar rol')}>
             {(['arrendatario', 'propietario'] as Role[]).map((r) => (
               <button
                 key={r}
@@ -68,19 +82,19 @@ export function Header({ path }: { path: string }) {
                 onClick={() => switchRole(r)}
                 className={`rounded-full px-3 py-1.5 transition sm:px-4 ${s.role === r ? 'bg-white text-teal-800 shadow-sm' : 'text-stone-500 hover:text-stone-800'}`}
               >
-                {r === 'arrendatario' ? 'Arrendatario' : 'Propietario'}
+                {r === 'arrendatario' ? tr('Tenant', 'Arrendatario') : tr('Landlord', 'Propietario')}
               </button>
             ))}
           </div>
 
           <label className="hidden items-center md:flex">
-            <span className="sr-only">{s.role === 'arrendatario' ? 'Persona demo' : 'Propietario demo'}</span>
+            <span className="sr-only">{s.role === 'arrendatario' ? tr('Demo profile', 'Persona demo') : tr('Demo landlord', 'Propietario demo')}</span>
             {s.role === 'arrendatario' ? (
               <select
                 value={s.applicantId}
                 onChange={(e) => s.setApplicant(e.target.value)}
                 className="max-w-[210px] rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold"
-                title="Perfil demo del arrendatario"
+                title={tr('Demo tenant profile', 'Perfil demo del arrendatario')}
               >
                 {applicants.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -93,7 +107,7 @@ export function Header({ path }: { path: string }) {
                 value={s.landlordId}
                 onChange={(e) => s.setLandlord(e.target.value)}
                 className="max-w-[210px] rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold"
-                title="Propietario demo"
+                title={tr('Demo landlord', 'Propietario demo')}
               >
                 {landlords.map((l) => (
                   <option key={l.id} value={l.id}>
@@ -121,7 +135,7 @@ export function Header({ path }: { path: string }) {
           value={s.role === 'arrendatario' ? s.applicantId : s.landlordId}
           onChange={(e) => (s.role === 'arrendatario' ? s.setApplicant(e.target.value) : s.setLandlord(e.target.value))}
           className="ml-auto max-w-[45%] shrink truncate rounded-full border border-stone-200 bg-white px-2 py-1.5 text-xs font-semibold"
-          aria-label="Perfil demo"
+          aria-label={tr('Demo profile', 'Perfil demo')}
         >
           {(s.role === 'arrendatario' ? applicants : landlords).map((p) => (
             <option key={p.id} value={p.id}>

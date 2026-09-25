@@ -7,6 +7,7 @@ import { ListingDetail } from './pages/ListingDetail'
 import { Listings } from './pages/Listings'
 import { Pipeline } from './pages/Pipeline'
 import { match, useRoute } from './lib/router'
+import { tr } from './lib/i18n'
 import { useStore } from './lib/store'
 
 function query(path: string) {
@@ -40,17 +41,22 @@ export default function App() {
       <main className="flex-1">{page}</main>
       <footer className="border-t border-stone-200 bg-stone-50">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>© 2026 EzRent · Prototipo de demostración · Bogotá, Colombia · Datos simulados</span>
+          <span>
+            {tr(
+              '© 2026 EzRent · Demo prototype · Bogotá, Colombia · Simulated data',
+              '© 2026 EzRent · Prototipo de demostración · Bogotá, Colombia · Datos simulados',
+            )}
+          </span>
           <button
             onClick={() => {
-              if (confirm('¿Reiniciar la demo? Se borrarán las aplicaciones y documentos cargados.')) {
+              if (confirm(tr('Reset the demo? Applications and uploaded documents will be cleared.', '¿Reiniciar la demo? Se borrarán las aplicaciones y documentos cargados.'))) {
                 s.reset()
                 window.location.hash = '/'
               }
             }}
             className="self-start font-semibold text-stone-600 underline sm:self-auto"
           >
-            Reiniciar demo
+            {tr('Reset demo', 'Reiniciar demo')}
           </button>
         </div>
       </footer>

@@ -8,6 +8,14 @@ A prototype of a rental marketplace and landlord management platform for Bogotá
 
 This is a frontend-only build. All data is seeded in code (`src/data/seed.ts`) and state is saved to `localStorage`, so the demo survives a refresh. The UI is in Spanish (es-CO) and prices are in COP.
 
+## Languages
+
+The app opens in **English** by default. Use the **EN / ES** toggle in the header to switch to Spanish (es-CO); the choice is saved with the rest of the demo state and survives a refresh or a demo reset.
+
+- Copy is written inline with `tr(english, spanish)` from `src/lib/i18n.ts`, so every original Spanish string sits next to its English version.
+- Seed data keeps its original Spanish fields and adds English ones (`titleEn`, `descriptionEn`, `amenitiesEn`, `cargoEn`, `employerEn`, `codeudorEn`, `polizaEn`, `noteEn`, `nameEn`, `tenantNameEn`).
+- Prices show as `COP 2,650,000` in English and `$ 2.650.000` in Spanish. Colombian terms with no direct equivalent (estrato, canon, administración, predial, cédula) are kept and explained in English.
+
 ## Stack
 
 Vite 8 · React 19 · TypeScript · Tailwind CSS 4 · three.js + @react-three/fiber + @react-three/drei. Routing uses the URL hash (`#/inmueble/...`), so the site works as plain static hosting.

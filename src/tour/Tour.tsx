@@ -3,22 +3,24 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
+import { tr } from '../lib/i18n'
 import { Apartment } from './Apartment'
 
 export interface RoomView {
   id: string
   label: string
+  labelEn: string
   position: [number, number, number]
   target: [number, number, number]
 }
 
 export const ROOMS: RoomView[] = [
-  { id: 'general', label: 'Vista general', position: [5, 12.5, -6.5], target: [5, 0, 4] },
-  { id: 'sala', label: 'Sala-comedor', position: [3, 6.2, -2.6], target: [3, 0.4, 2.4] },
-  { id: 'cocina', label: 'Cocina', position: [4.6, 5.6, 0.4], target: [8.2, 0.5, 1.8] },
-  { id: 'hab1', label: 'Habitación principal', position: [1.9, 6.2, 2.8], target: [1.9, 0.4, 6.3] },
-  { id: 'bano', label: 'Baño', position: [4.9, 6.4, 3.6], target: [4.9, 0.3, 6.5] },
-  { id: 'hab2', label: 'Habitación 2', position: [8.2, 6.2, 2.2], target: [8.2, 0.4, 5.8] },
+  { id: 'general', label: 'Vista general', labelEn: 'Overview', position: [5, 12.5, -6.5], target: [5, 0, 4] },
+  { id: 'sala', label: 'Sala-comedor', labelEn: 'Living-dining', position: [3, 6.2, -2.6], target: [3, 0.4, 2.4] },
+  { id: 'cocina', label: 'Cocina', labelEn: 'Kitchen', position: [4.6, 5.6, 0.4], target: [8.2, 0.5, 1.8] },
+  { id: 'hab1', label: 'Habitación principal', labelEn: 'Main bedroom', position: [1.9, 6.2, 2.8], target: [1.9, 0.4, 6.3] },
+  { id: 'bano', label: 'Baño', labelEn: 'Bathroom', position: [4.9, 6.4, 3.6], target: [4.9, 0.3, 6.5] },
+  { id: 'hab2', label: 'Habitación 2', labelEn: 'Bedroom 2', position: [8.2, 6.2, 2.2], target: [8.2, 0.4, 5.8] },
 ]
 
 function CameraRig({ view, onArrive }: { view: RoomView; onArrive: () => void }) {
@@ -113,14 +115,14 @@ export default function Tour() {
 
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
         <span className="pointer-events-auto inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-stone-900/80 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> <span className="hidden sm:inline">Recorrido 3D ·</span> {view.label}
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> <span className="hidden sm:inline">{tr('3D tour ·', 'Recorrido 3D ·')}</span> {tr(view.labelEn, view.label)}
           {moving && <span className="opacity-60">…</span>}
         </span>
         <button
           onClick={() => setLowWalls((v) => !v)}
           className="pointer-events-auto whitespace-nowrap rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-stone-800 shadow ring-1 ring-black/5 hover:bg-white"
         >
-          {lowWalls ? 'Muros completos' : 'Cortar muros'}
+          {lowWalls ? tr('Full walls', 'Muros completos') : tr('Cut walls', 'Cortar muros')}
         </button>
       </div>
 
@@ -134,11 +136,16 @@ export default function Tour() {
                 view.id === r.id ? 'bg-teal-700 text-white ring-teal-800' : 'bg-white/95 text-stone-800 ring-black/5 hover:bg-white'
               }`}
             >
-              {r.label}
+              {tr(r.labelEn, r.label)}
             </button>
           ))}
         </div>
-        <p className="mt-1 text-[11px] text-stone-600">Toca el piso de un ambiente para ir a él · arrastra para girar · pellizca o usa la rueda para acercar</p>
+        <p className="mt-1 text-[11px] text-stone-600">
+          {tr(
+            'Tap a room’s floor to go there · drag to rotate · pinch or scroll to zoom',
+            'Toca el piso de un ambiente para ir a él · arrastra para girar · pellizca o usa la rueda para acercar',
+          )}
+        </p>
       </div>
     </div>
   )
