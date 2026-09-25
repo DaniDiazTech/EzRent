@@ -101,7 +101,7 @@ export function Apply({ id }: { id: string }) {
       </div>
 
       <ol className="mt-6 flex items-center gap-2 text-xs font-semibold text-stone-500">
-        {tr(['Consent', 'Documents', 'AI review'], ['Autorización', 'Documentos', 'Revisión IA']).map((l, i) => (
+        {tr(['Consent', 'Documents', 'Verification'], ['Autorización', 'Documentos', 'Verificación']).map((l, i) => (
           <li key={l} className="flex items-center gap-2">
             <span className={`flex h-6 w-6 items-center justify-center rounded-full ${i + 1 <= stepNo ? 'bg-teal-700 text-white' : 'bg-stone-200'}`}>{i + 1}</span>
             <span className={i + 1 === stepNo ? 'text-stone-900' : ''}>{l}</span>
@@ -204,7 +204,7 @@ export function Apply({ id }: { id: string }) {
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Button className="py-3" disabled={!allDocs} onClick={startReview}>
-              {tr('Review with AI', 'Revisar con IA')}
+              {tr('Check requirements', 'Verificar requisitos')}
             </Button>
             {!allDocs && (
               <Button variant="secondary" className="py-3" onClick={fillSample}>
@@ -225,7 +225,10 @@ export function Apply({ id }: { id: string }) {
         <section className="mt-6 animate-fade-up">
           <h1 className="text-2xl font-extrabold">{tr('Reviewing your documents…', 'Revisando tus documentos…')}</h1>
           <p className="mt-1 text-stone-600">
-            {tr('Our AI extracts your data and compares it with the landlord’s requirements.', 'Nuestra IA extrae tus datos y los compara con los requisitos del propietario.')}
+            {tr(
+              'Our agent is reviewing your documents and will tell you in seconds whether you meet the requirements.',
+              'Nuestro agente está revisando tus documentos y te responderá en segundos si cumples con los requisitos.',
+            )}
           </p>
           <div className="mt-6 rounded-2xl border border-stone-200 p-5">
             <ul className="space-y-4">

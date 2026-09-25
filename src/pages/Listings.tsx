@@ -49,8 +49,8 @@ export function Listings() {
           </h1>
           <p className="mt-3 max-w-2xl text-stone-600">
             {tr(
-              'Upload your documents once, our AI checks them against each landlord’s requirements, and you tour every apartment in 3D before leaving home.',
-              'Sube tus documentos una vez, nuestra IA los compara con los requisitos de cada propietario y recorre cada apartamento en 3D antes de moverte.',
+              'Upload your documents once and our agent will reply right away with whether you meet each landlord’s requirements. Then tour every apartment in 3D before leaving home.',
+              'Sube tus documentos una vez y nuestro agente te responderá de manera inmediata si cumples con los requisitos de cada propietario. Además, recorre cada apartamento en 3D antes de moverte.',
             )}
           </p>
           {verified ? (
@@ -67,7 +67,7 @@ export function Listings() {
           ) : (
             <div className="mt-5 flex flex-wrap gap-4 text-sm text-stone-600">
               <span>{tr('① Upload your documents just once', '① Sube tus documentos una sola vez')}</span>
-              <span>{tr('② AI tells you if you qualify', '② La IA te dice si calificas')}</span>
+              <span>{tr('② Our agent tells you right away if you meet the requirements', '② Nuestro agente te responde al instante si cumples los requisitos')}</span>
               <span>{tr('③ Tour in 3D and book the visit', '③ Recorre en 3D y agenda la visita')}</span>
             </div>
           )}

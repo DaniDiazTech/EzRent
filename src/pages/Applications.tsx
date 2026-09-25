@@ -81,8 +81,8 @@ export function Applications({ highlight }: { highlight?: string }) {
                   </div>
                   <div className="mt-0.5 text-sm text-stone-600">
                     {tr(
-                      `${formatCOP(l.canon)} / month · Applied ${formatRelative(a.createdAt)} · AI: ${ev.passedCount}/${ev.results.length} requirements`,
-                      `${formatCOP(l.canon)} / mes · Aplicaste ${formatRelative(a.createdAt)} · IA: ${ev.passedCount}/${ev.results.length} requisitos`,
+                      `${formatCOP(l.canon)} / month · Applied ${formatRelative(a.createdAt)} · You meet ${ev.passedCount}/${ev.results.length} requirements`,
+                      `${formatCOP(l.canon)} / mes · Aplicaste ${formatRelative(a.createdAt)} · Cumples ${ev.passedCount}/${ev.results.length} requisitos`,
                     )}
                   </div>
                   <p className="mt-2 text-sm text-stone-700">{tr(a.noteEn, a.note) ?? tr(statusCopyEn, statusCopy)[a.status]}</p>

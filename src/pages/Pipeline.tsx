@@ -48,8 +48,8 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
           <h1 className="text-3xl font-extrabold tracking-tight">{tr('Pre-approved applicants', 'Aplicantes preaprobados')}</h1>
           <p className="mt-1 text-stone-600">
             {tr(
-              'You only see people who already meet your requirements. The AI screens out the rest before you waste a visit.',
-              'Solo ves personas que ya cumplen tus requisitos. La IA descarta el resto antes de que pierdas una visita.',
+              'You only see people who already meet your requirements. Our agent filters out the rest for you, before you waste a visit.',
+              'Solo ves personas que ya cumplen tus requisitos. Nuestro agente filtra el resto por ti antes de que pierdas una visita.',
             )}
           </p>
         </div>
@@ -129,7 +129,7 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
                       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
                         <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" />
                       </svg>
-                      {tr('AI summary', 'Resumen IA')}
+                      {tr('Profile summary', 'Resumen del perfil')}
                     </div>
                     <p className="mt-1.5 text-sm leading-relaxed text-stone-700">{aiSummary(applicant, listing)}</p>
                   </div>

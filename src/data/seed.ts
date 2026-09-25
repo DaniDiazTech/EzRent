@@ -28,7 +28,7 @@ export const landlords: Landlord[] = [
 export const listings: Listing[] = [
   {
     id: 'chapinero-alto-2h',
-    title: 'Apartamento luminoso con balcón en Chapinero Alto',
+    title: 'Apartamento iluminado con balcón en Chapinero Alto',
     barrio: 'Chapinero',
     localidad: 'Chapinero',
     estrato: 5,

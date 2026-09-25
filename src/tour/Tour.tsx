@@ -122,7 +122,7 @@ export default function Tour() {
           onClick={() => setLowWalls((v) => !v)}
           className="pointer-events-auto whitespace-nowrap rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-stone-800 shadow ring-1 ring-black/5 hover:bg-white"
         >
-          {lowWalls ? tr('Full walls', 'Muros completos') : tr('Cut walls', 'Cortar muros')}
+          {lowWalls ? tr('Show walls', 'Mostrar paredes') : tr('Hide walls', 'Ocultar paredes')}
         </button>
       </div>
 
@@ -143,7 +143,7 @@ export default function Tour() {
         <p className="mt-1 text-[11px] text-stone-600">
           {tr(
             'Tap a room’s floor to go there · drag to rotate · pinch or scroll to zoom',
-            'Toca el piso de un ambiente para ir a él · arrastra para girar · pellizca o usa la rueda para acercar',
+            'Toca el piso de un espacio para ir a él · arrastra para girar · pellizca o usa la rueda para acercar',
           )}
         </p>
       </div>
