@@ -36,6 +36,10 @@ export interface Listing {
   landlordId: string
   description: string
   amenities: string[]
+  /** English copy. The Spanish fields above stay as the original content. */
+  titleEn: string
+  descriptionEn: string
+  amenitiesEn: string[]
   requirements: Requirements
   disponibleDesde: string
 }
@@ -64,6 +68,10 @@ export interface Applicant {
   codeudor: string | null
   poliza: string | null
   color: string
+  cargoEn: string
+  employerEn: string
+  codeudorEn: string | null
+  polizaEn: string | null
 }
 
 export type ApplicationStatus = 'en_revision' | 'preaprobado' | 'aceptado' | 'rechazado'
@@ -75,6 +83,7 @@ export interface Application {
   status: ApplicationStatus
   createdAt: string
   note?: string
+  noteEn?: string
 }
 
 export type BillType = 'agua' | 'luz' | 'gas' | 'administracion' | 'predial'
@@ -96,6 +105,8 @@ export interface ManagedProperty {
   name: string
   barrio: string
   tenantName: string
+  nameEn: string
+  tenantNameEn: string
   canon: number
   history: MonthRecord[]
 }

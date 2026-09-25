@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { BILL_FEE, landlords, managedProperties } from '../data/seed'
 import { formatCOP, formatMillions, monthLong, monthShort } from '../lib/format'
+import { tr } from '../lib/i18n'
 import { useStore } from '../lib/store'
 import type { BillType, ManagedProperty, MonthRecord } from '../types'
 
@@ -10,6 +11,14 @@ const BILL_LABEL: Record<BillType, string> = {
   luz: 'Luz (Enel)',
   gas: 'Gas (Vanti)',
   predial: 'Predial (cuota)',
+}
+
+const BILL_LABEL_EN: Record<BillType, string> = {
+  administracion: 'HOA fee (administración)',
+  agua: 'Water (Acueducto)',
+  luz: 'Electricity (Enel)',
+  gas: 'Gas (Vanti)',
+  predial: 'Property tax (predial)',
 }
 
 const NET = '#0d9488'
@@ -51,41 +60,48 @@ export function CashFlow() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <p className="text-sm font-semibold text-teal-700">Panel del propietario · {landlord.name}</p>
-      <h1 className="text-3xl font-extrabold tracking-tight">Flujo de caja</h1>
+      <p className="text-sm font-semibold text-teal-700">{tr(`Landlord dashboard · ${landlord.name}`, `Panel del propietario · ${landlord.name}`)}</p>
+      <h1 className="text-3xl font-extrabold tracking-tight">{tr('Cash flow', 'Flujo de caja')}</h1>
       <p className="mt-1 max-w-2xl text-stone-600">
-        EzRent cobra el arriendo y paga automáticamente agua, luz, gas, administración y predial. Tú recibes el neto cada mes. Tarifa: {formatCOP(BILL_FEE)} por factura pagada.
+        {tr(
+          `EzRent collects the rent and automatically pays water, electricity, gas, HOA fees (administración) and property tax (predial). You receive the net every month. Fee: ${formatCOP(BILL_FEE)} per bill paid.`,
+          `EzRent cobra el arriendo y paga automáticamente agua, luz, gas, administración y predial. Tú recibes el neto cada mes. Tarifa: ${formatCOP(BILL_FEE)} por factura pagada.`,
+        )}
       </p>
 
       <div className="no-scrollbar mt-6 flex gap-2 overflow-x-auto pb-1">
-        {[{ id: 'all', name: 'Todos los inmuebles' }, ...props].map((p) => (
+        {[{ id: 'all', name: 'Todos los inmuebles', nameEn: 'All properties' }, ...props].map((p) => (
           <button
             key={p.id}
             onClick={() => setPropId(p.id)}
             className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 ${propId === p.id ? 'bg-stone-900 text-white ring-stone-900' : 'bg-white text-stone-700 ring-stone-300 hover:bg-stone-50'}`}
           >
-            {p.name}
+            {tr(p.nameEn, p.name)}
           </button>
         ))}
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi label={`Neto ${monthLong(lastMonth)}`} value={formatCOP(last.net)} hero />
-        <Kpi label={`Arriendo recaudado ${monthShort(lastMonth)}`} value={formatCOP(last.rent)} />
-        <Kpi label="Neto últimos 6 meses" value={formatCOP(sixNet)} />
-        <Kpi label="Facturas pagadas (6 meses)" value={`${sixBills}`} sub={`Tarifas EzRent: ${formatCOP(sixFees)}`} />
+        <Kpi label={tr(`Net ${monthLong(lastMonth)}`, `Neto ${monthLong(lastMonth)}`)} value={formatCOP(last.net)} hero />
+        <Kpi label={tr(`Rent collected ${monthShort(lastMonth)}`, `Arriendo recaudado ${monthShort(lastMonth)}`)} value={formatCOP(last.rent)} />
+        <Kpi label={tr('Net, last 6 months', 'Neto últimos 6 meses')} value={formatCOP(sixNet)} />
+        <Kpi
+          label={tr('Bills paid (6 months)', 'Facturas pagadas (6 meses)')}
+          value={`${sixBills}`}
+          sub={tr(`EzRent fees: ${formatCOP(sixFees)}`, `Tarifas EzRent: ${formatCOP(sixFees)}`)}
+        />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
         <section className="rounded-2xl border border-stone-200 p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-bold">Arriendo recaudado por mes</h2>
+            <h2 className="font-bold">{tr('Rent collected per month', 'Arriendo recaudado por mes')}</h2>
             <div className="flex items-center gap-4 text-xs text-stone-600">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: NET }} /> Ingreso neto
+                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: NET }} /> {tr('Net income', 'Ingreso neto')}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: COSTS }} /> Facturas + tarifas
+                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: COSTS }} /> {tr('Bills + fees', 'Facturas + tarifas')}
               </span>
             </div>
           </div>
@@ -93,7 +109,7 @@ export function CashFlow() {
         </section>
 
         <section className="rounded-2xl border border-stone-200 p-5">
-          <h2 className="font-bold">Pagos automáticos · {monthLong(lastMonth)}</h2>
+          <h2 className="font-bold">{tr(`Automatic payments · ${monthLong(lastMonth)}`, `Pagos automáticos · ${monthLong(lastMonth)}`)}</h2>
           <ul className="mt-3 max-h-[330px] divide-y divide-stone-100 overflow-y-auto pr-1 text-sm">
             {scope.flatMap((p) =>
               p.history
@@ -101,12 +117,12 @@ export function CashFlow() {
                 .bills.map((b) => (
                   <li key={p.id + b.type} className="flex items-center justify-between gap-3 py-2.5">
                     <div className="min-w-0">
-                      <div className="font-semibold">{BILL_LABEL[b.type]}</div>
-                      <div className="truncate text-xs text-stone-500">{p.name} · pagado ✓</div>
+                      <div className="font-semibold">{tr(BILL_LABEL_EN, BILL_LABEL)[b.type]}</div>
+                      <div className="truncate text-xs text-stone-500">{tr(`${p.nameEn} · paid ✓`, `${p.name} · pagado ✓`)}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-semibold">{formatCOP(b.amount)}</div>
-                      <div className="text-xs text-stone-500">+ {formatCOP(BILL_FEE)} tarifa</div>
+                      <div className="text-xs text-stone-500">{tr(`+ ${formatCOP(BILL_FEE)} fee`, `+ ${formatCOP(BILL_FEE)} tarifa`)}</div>
                     </div>
                   </li>
                 )),
@@ -116,18 +132,18 @@ export function CashFlow() {
       </div>
 
       <section className="mt-6 overflow-hidden rounded-2xl border border-stone-200">
-        <h2 className="p-5 pb-3 font-bold">Neto por inmueble y mes</h2>
+        <h2 className="p-5 pb-3 font-bold">{tr('Net by property and month', 'Neto por inmueble y mes')}</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
             <thead className="bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500">
               <tr>
-                <th className="px-5 py-2.5">Inmueble</th>
+                <th className="px-5 py-2.5">{tr('Property', 'Inmueble')}</th>
                 {series.map((m) => (
                   <th key={m.month} className="px-3 py-2.5 text-right capitalize">
                     {monthShort(m.month)}
                   </th>
                 ))}
-                <th className="px-5 py-2.5 text-right">Total 6 m</th>
+                <th className="px-5 py-2.5 text-right">{tr('6-month total', 'Total 6 m')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
@@ -136,13 +152,19 @@ export function CashFlow() {
                 return (
                   <tr key={p.id}>
                     <td className="px-5 py-3">
-                      <div className="font-semibold">{p.name}</div>
+                      <div className="font-semibold">{tr(p.nameEn, p.name)}</div>
                       <div className="text-xs text-stone-500">
-                        Arrendatario: {p.tenantName} · canon {formatCOP(p.canon)}
+                        {tr(
+                          `Tenant: ${p.tenantNameEn} · rent ${formatCOP(p.canon)}`,
+                          `Arrendatario: ${p.tenantName} · canon ${formatCOP(p.canon)}`,
+                        )}
                       </div>
                     </td>
                     {rows.map((r, i) => (
-                      <td key={i} className="px-3 py-3 text-right tabular-nums" title={`Recaudado ${formatCOP(r.rent)} − facturas ${formatCOP(r.bills)} − tarifas ${formatCOP(r.fees)}`}>
+                      <td key={i} className="px-3 py-3 text-right tabular-nums" title={tr(
+                          `Collected ${formatCOP(r.rent)} − bills ${formatCOP(r.bills)} − fees ${formatCOP(r.fees)}`,
+                          `Recaudado ${formatCOP(r.rent)} − facturas ${formatCOP(r.bills)} − tarifas ${formatCOP(r.fees)}`,
+                        )}>
                         {formatMillions(r.net)}
                       </td>
                     ))}
@@ -185,7 +207,7 @@ function Chart({ data }: { data: ReturnType<typeof aggregate> }) {
 
   return (
     <div className="relative mt-4">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Arriendo recaudado dividido en ingreso neto y facturas pagadas por mes">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={tr('Rent collected split into net income and bills paid, per month', 'Arriendo recaudado dividido en ingreso neto y facturas pagadas por mes')}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="#e7e5e4" strokeDasharray={t === 0 ? undefined : '3 4'} />
@@ -213,7 +235,7 @@ function Chart({ data }: { data: ReturnType<typeof aggregate> }) {
               </text>
               {i === data.length - 1 && (
                 <text x={x(i)} y={costTop - 6} textAnchor="middle" fontSize="11" fontWeight="700" fill="#1c1917">
-                  {formatMillions(d.net)} neto
+                  {formatMillions(d.net)} {tr('net', 'neto')}
                 </text>
               )}
             </g>
@@ -226,11 +248,11 @@ function Chart({ data }: { data: ReturnType<typeof aggregate> }) {
           style={{ left: `clamp(0px, calc(${(x(hover) / W) * 100}% - 104px), calc(100% - 208px))` }}
         >
           <div className="mb-1 font-bold first-letter:uppercase">{monthLong(data[hover].month)}</div>
-          <Row k="Recaudado" v={formatCOP(data[hover].rent)} />
-          <Row k="Facturas" v={`− ${formatCOP(data[hover].bills)}`} dot={COSTS} />
-          <Row k={`Tarifas (${data[hover].count})`} v={`− ${formatCOP(data[hover].fees)}`} />
+          <Row k={tr('Collected', 'Recaudado')} v={formatCOP(data[hover].rent)} />
+          <Row k={tr('Bills', 'Facturas')} v={`− ${formatCOP(data[hover].bills)}`} dot={COSTS} />
+          <Row k={tr(`Fees (${data[hover].count})`, `Tarifas (${data[hover].count})`)} v={`− ${formatCOP(data[hover].fees)}`} />
           <div className="mt-1 border-t border-white/20 pt-1">
-            <Row k="Neto" v={formatCOP(data[hover].net)} dot={NET} bold />
+            <Row k={tr('Net', 'Neto')} v={formatCOP(data[hover].net)} dot={NET} bold />
           </div>
         </div>
       )}

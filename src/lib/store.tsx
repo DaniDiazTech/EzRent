@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { DEMO_APPLICANT_ID, seedApplications } from '../data/seed'
 import type { Application, ApplicationStatus, DocType, Role } from '../types'
+import { DEFAULT_LANG, setLang as setActiveLang, type Lang } from './i18n'
 
 const STORAGE_KEY = 'ezrent:v1'
 
 export interface AppState {
+  lang: Lang
   role: Role
   applicantId: string
   landlordId: string
@@ -17,6 +19,7 @@ export interface AppState {
 }
 
 const initialState = (): AppState => ({
+  lang: DEFAULT_LANG,
   role: 'arrendatario',
   applicantId: DEMO_APPLICANT_ID,
   landlordId: 'l1',
@@ -37,6 +40,7 @@ function load(): AppState {
 }
 
 interface Store extends AppState {
+  setLang: (l: Lang) => void
   setRole: (r: Role) => void
   setApplicant: (id: string) => void
   setLandlord: (id: string) => void
@@ -52,6 +56,8 @@ const Ctx = createContext<Store | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(load)
+  // Module-level language used by tr() and the formatters; set before children render.
+  setActiveLang(state.lang)
 
   useEffect(() => {
     try {
@@ -61,6 +67,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state])
 
+  const setLang = useCallback((lang: Lang) => setState((s) => ({ ...s, lang })), [])
   const setRole = useCallback((role: Role) => setState((s) => ({ ...s, role })), [])
   const setApplicant = useCallback((applicantId: string) => setState((s) => ({ ...s, applicantId })), [])
   const setLandlord = useCallback((landlordId: string) => setState((s) => ({ ...s, landlordId })), [])
@@ -99,17 +106,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, applications: s.applications.map((a) => (a.id === id ? { ...a, status } : a)) })),
     [],
   )
-  const reset = useCallback(() => setState(initialState()), [])
+  // Reiniciar la demo conserva el idioma elegido. / Resetting the demo keeps the chosen language.
+  const reset = useCallback(() => setState((s) => ({ ...initialState(), lang: s.lang })), [])
 
   const value = useMemo<Store>(
-    () => ({ ...state, setRole, setApplicant, setLandlord, giveConsent, setDocuments, markVerified, apply, setStatus, reset }),
-    [state, setRole, setApplicant, setLandlord, giveConsent, setDocuments, markVerified, apply, setStatus, reset],
+    () => ({ ...state, setLang, setRole, setApplicant, setLandlord, giveConsent, setDocuments, markVerified, apply, setStatus, reset }),
+    [state, setLang, setRole, setApplicant, setLandlord, giveConsent, setDocuments, markVerified, apply, setStatus, reset],
   )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
 export function useStore() {
   const s = useContext(Ctx)
-  if (!s) throw new Error('useStore debe usarse dentro de StoreProvider')
+  if (!s) throw new Error('useStore must be used inside StoreProvider / useStore debe usarse dentro de StoreProvider')
   return s
 }

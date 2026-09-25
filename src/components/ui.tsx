@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { tr } from '../lib/i18n'
 import type { ApplicationStatus } from '../types'
 
 export function Logo({ className = '' }: { className?: string }) {
@@ -35,21 +36,23 @@ export function Badge3D({ className = '' }: { className?: string }) {
       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-teal-700" fill="none" stroke="currentColor" strokeWidth="2.2">
         <path d="M12 2 3 7v10l9 5 9-5V7z M3 7l9 5 9-5 M12 12v10" strokeLinejoin="round" />
       </svg>
-      Recorrido 3D
+      {tr('3D tour', 'Recorrido 3D')}
     </span>
   )
 }
 
-const statusStyles: Record<ApplicationStatus, { label: string; cls: string }> = {
-  en_revision: { label: 'En revisión', cls: 'bg-amber-50 text-amber-800 ring-amber-200' },
-  preaprobado: { label: 'Preaprobado', cls: 'bg-teal-50 text-teal-800 ring-teal-200' },
-  aceptado: { label: 'Aceptado', cls: 'bg-emerald-600 text-white ring-emerald-700' },
-  rechazado: { label: 'Rechazado', cls: 'bg-rose-50 text-rose-700 ring-rose-200' },
+const statusStyles: Record<ApplicationStatus, { label: string; labelEn: string; cls: string }> = {
+  en_revision: { label: 'En revisión', labelEn: 'Under review', cls: 'bg-amber-50 text-amber-800 ring-amber-200' },
+  preaprobado: { label: 'Preaprobado', labelEn: 'Pre-approved', cls: 'bg-teal-50 text-teal-800 ring-teal-200' },
+  aceptado: { label: 'Aceptado', labelEn: 'Accepted', cls: 'bg-emerald-600 text-white ring-emerald-700' },
+  rechazado: { label: 'Rechazado', labelEn: 'Declined', cls: 'bg-rose-50 text-rose-700 ring-rose-200' },
 }
+
+export const statusLabel = (status: ApplicationStatus) => tr(statusStyles[status].labelEn, statusStyles[status].label)
 
 export function StatusPill({ status }: { status: ApplicationStatus }) {
   const s = statusStyles[status]
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ${s.cls}`}>{s.label}</span>
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ${s.cls}`}>{tr(s.labelEn, s.label)}</span>
 }
 
 export function Avatar({ initials, color, size = 40 }: { initials: string; color: string; size?: number }) {
@@ -65,11 +68,11 @@ export function Avatar({ initials, color, size = 40 }: { initials: string; color
 
 export function Check({ ok, className = 'h-5 w-5' }: { ok: boolean; className?: string }) {
   return ok ? (
-    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-emerald-600`} fill="currentColor" aria-label="Cumple">
+    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-emerald-600`} fill="currentColor" aria-label={tr('Meets', 'Cumple')}>
       <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m-1.2 14.2-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" />
     </svg>
   ) : (
-    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-rose-600`} fill="currentColor" aria-label="No cumple">
+    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-rose-600`} fill="currentColor" aria-label={tr('Does not meet', 'No cumple')}>
       <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m3.5 12.1-1.4 1.4L12 13.4l-2.1 2.1-1.4-1.4 2.1-2.1-2.1-2.1 1.4-1.4 2.1 2.1 2.1-2.1 1.4 1.4-2.1 2.1z" />
     </svg>
   )

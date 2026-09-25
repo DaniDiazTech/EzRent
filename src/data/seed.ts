@@ -45,6 +45,10 @@ export const listings: Listing[] = [
     description:
       'A dos cuadras de la Carrera 7 y del Parque Portugal. Sala-comedor con balcón y vista a los cerros, cocina abierta con barra, dos habitaciones (la principal con baño privado) y parqueadero cubierto. Edificio con portería 24 h y gimnasio.',
     amenities: ['Portería 24 h', 'Gimnasio', 'Balcón', 'Ascensor', 'Vista a los cerros'],
+    titleEn: "Bright apartment with a balcony in Chapinero Alto",
+    descriptionEn:
+      "Two blocks from Carrera 7 and Parque Portugal. Living-dining room with a balcony and views of the eastern hills, open kitchen with a breakfast bar, two bedrooms (the main one with a private bathroom) and covered parking. Building with 24/7 front desk and a gym.",
+    amenitiesEn: ["24/7 front desk", "Gym", "Balcony", "Elevator", "View of the hills"],
     requirements: { incomeMultiple: 3, contract: 'indefinido_o_fijo', minTenureMonths: 12, guarantee: 'codeudor_o_poliza', minCreditScore: 650 },
     disponibleDesde: '2026-10-01',
   },
@@ -67,6 +71,10 @@ export const listings: Listing[] = [
     description:
       'Techos altos, pisos en madera y mucha luz natural. Cerca al Park Way, a la Universidad Nacional y a estaciones de TransMilenio de la Calle 45 y la NQS. Ideal para familia o para quien trabaja desde casa.',
     amenities: ['Pisos en madera', 'Estudio', 'Cerca a TransMilenio', 'Zonas verdes'],
+    titleEn: "Spacious apartment in a classic Teusaquillo building",
+    descriptionEn:
+      "High ceilings, hardwood floors and lots of natural light. Close to the Park Way, Universidad Nacional and the TransMilenio stations on Calle 45 and NQS. Ideal for a family or for working from home.",
+    amenitiesEn: ["Hardwood floors", "Study", "Near TransMilenio", "Green areas"],
     requirements: { incomeMultiple: 3, contract: 'indefinido_o_fijo', minTenureMonths: 12, guarantee: 'codeudor_o_poliza', minCreditScore: 620 },
     disponibleDesde: '2026-10-15',
   },
@@ -89,6 +97,10 @@ export const listings: Listing[] = [
     description:
       'Acabados de primera, chimenea, cocina integral con isla y terraza privada. A pocas cuadras del parque de Usaquén y de Unicentro. Edificio con piscina climatizada, BBQ y salón comunal.',
     amenities: ['Chimenea', 'Terraza', 'Piscina', 'BBQ', 'Depósito', '2 parqueaderos'],
+    titleEn: "Luxury apartment in Santa Bárbara, Usaquén",
+    descriptionEn:
+      "High-end finishes, fireplace, fitted kitchen with an island and a private terrace. A few blocks from Usaquén park and Unicentro. Building with a heated pool, BBQ area and event room.",
+    amenitiesEn: ["Fireplace", "Terrace", "Pool", "BBQ", "Storage unit", "2 parking spots"],
     requirements: { incomeMultiple: 3, contract: 'indefinido', minTenureMonths: 24, guarantee: 'poliza', minCreditScore: 720 },
     disponibleDesde: '2026-10-01',
   },
@@ -111,6 +123,10 @@ export const listings: Listing[] = [
     description:
       'En la Calle 140 con Autopista, a pasos de centros comerciales, colegios y supermercados. Conjunto cerrado con parque infantil y salón comunal.',
     amenities: ['Conjunto cerrado', 'Parque infantil', 'Salón comunal', 'Ascensor'],
+    titleEn: "Family apartment in Cedritos with parking",
+    descriptionEn:
+      "On Calle 140 by the Autopista, steps from shopping malls, schools and supermarkets. Gated complex with a playground and event room.",
+    amenitiesEn: ["Gated complex", "Playground", "Event room", "Elevator"],
     requirements: { incomeMultiple: 3, contract: 'indefinido_o_fijo', minTenureMonths: 6, guarantee: 'codeudor_o_poliza', minCreditScore: 620 },
     disponibleDesde: '2026-11-01',
   },
@@ -133,6 +149,10 @@ export const listings: Listing[] = [
     description:
       'Remodelado en 2025: cocina nueva, baño renovado y ventanas con doble vidrio. Frente al Park Way, rodeado de cafés y librerías. Sin parqueadero, pero con bicicletero.',
     amenities: ['Remodelado', 'Bicicletero', 'Cerca a ciclorruta', 'Pet friendly'],
+    titleEn: "Renovated apartment facing the Park Way, La Soledad",
+    descriptionEn:
+      "Renovated in 2025: new kitchen, updated bathroom and double-glazed windows. Facing the Park Way, surrounded by cafés and bookstores. No parking, but there is bike storage.",
+    amenitiesEn: ["Renovated", "Bike storage", "Near bike lane", "Pet friendly"],
     requirements: { incomeMultiple: 2.5, contract: 'indefinido_o_fijo', minTenureMonths: 6, guarantee: 'codeudor_o_poliza', minCreditScore: 600 },
     disponibleDesde: '2026-10-05',
   },
@@ -155,6 +175,10 @@ export const listings: Listing[] = [
     description:
       'Edificio nuevo a una cuadra del centro comercial Galerías y a diez minutos de la Universidad Javeriana en bus. Cocina abierta, lavandería comunal y coworking en la terraza.',
     amenities: ['Coworking', 'Terraza comunal', 'Lavandería', 'Edificio nuevo'],
+    titleEn: "Modern studio near Galerías",
+    descriptionEn:
+      "New building one block from the Galerías shopping mall and ten minutes by bus from Universidad Javeriana. Open kitchen, shared laundry room and a coworking space on the rooftop.",
+    amenitiesEn: ["Coworking", "Shared rooftop", "Laundry room", "New building"],
     requirements: { incomeMultiple: 2.5, contract: 'cualquiera', minTenureMonths: 6, guarantee: 'codeudor_o_poliza', minCreditScore: 600 },
     disponibleDesde: '2026-10-01',
   },
@@ -177,6 +201,10 @@ export const listings: Listing[] = [
     description:
       'A diez minutos del aeropuerto y junto a la Avenida La Esperanza. Conjunto con piscina, cancha múltiple y vigilancia. Ideal para quien viaja con frecuencia.',
     amenities: ['Piscina', 'Cancha múltiple', 'Cerca al aeropuerto', 'Vigilancia'],
+    titleEn: "Apartment in Ciudad Salitre near El Dorado airport",
+    descriptionEn:
+      "Ten minutes from the airport, next to Avenida La Esperanza. Complex with a pool, multi-sport court and security. Ideal if you travel often.",
+    amenitiesEn: ["Pool", "Multi-sport court", "Near the airport", "Security"],
     requirements: { incomeMultiple: 3, contract: 'indefinido', minTenureMonths: 12, guarantee: 'codeudor_o_poliza', minCreditScore: 650 },
     disponibleDesde: '2026-10-20',
   },
@@ -199,6 +227,10 @@ export const listings: Listing[] = [
     description:
       'Cerca al Portal Suba y a la Avenida Ciudad de Cali. Conjunto con gimnasio, parque y zonas verdes. Vista despejada hacia los cerros de Suba.',
     amenities: ['Gimnasio', 'Zonas verdes', 'Cerca al Portal Suba', 'Vista despejada'],
+    titleEn: "Apartment with a view in Suba, Pinar area",
+    descriptionEn:
+      "Close to Portal Suba and Avenida Ciudad de Cali. Complex with a gym, park and green areas. Open view toward the Suba hills.",
+    amenitiesEn: ["Gym", "Green areas", "Near Portal Suba", "Open view"],
     requirements: { incomeMultiple: 2, contract: 'cualquiera', minTenureMonths: 6, guarantee: 'codeudor_o_poliza', minCreditScore: 580 },
     disponibleDesde: '2026-10-01',
   },
@@ -221,6 +253,10 @@ export const applicants: Applicant[] = [
     codeudor: null,
     poliza: 'Póliza preaprobada · Seguros El Libertador',
     color: '#0f766e',
+    cargoEn: "Data engineer",
+    employerEn: "Bancolombia S.A.",
+    codeudorEn: null,
+    polizaEn: "Pre-approved lease insurance · Seguros El Libertador",
   },
   {
     id: 'a2',
@@ -238,6 +274,10 @@ export const applicants: Applicant[] = [
     codeudor: 'Gloria Rojas (madre) · propietaria de inmueble en Bogotá',
     poliza: null,
     color: '#7c3aed',
+    cargoEn: "UX designer",
+    employerEn: "Agencia Nómada (contractor)",
+    codeudorEn: "Gloria Rojas (mother) · owns property in Bogotá",
+    polizaEn: null,
   },
   {
     id: 'a3',
@@ -255,6 +295,10 @@ export const applicants: Applicant[] = [
     codeudor: null,
     poliza: 'Póliza preaprobada · SURA Arrendamiento',
     color: '#db2777',
+    cargoEn: "General practitioner",
+    employerEn: "Clínica del Country",
+    codeudorEn: null,
+    polizaEn: "Pre-approved lease insurance · SURA Arrendamiento",
   },
   {
     id: 'a4',
@@ -272,6 +316,10 @@ export const applicants: Applicant[] = [
     codeudor: null,
     poliza: null,
     color: '#ea580c',
+    cargoEn: "Restaurant owner",
+    employerEn: "Self-employed · Restaurante La Candela",
+    codeudorEn: null,
+    polizaEn: null,
   },
   {
     id: 'a5',
@@ -289,6 +337,10 @@ export const applicants: Applicant[] = [
     codeudor: 'Hernán Ortiz (padre) · pensionado con finca raíz',
     poliza: null,
     color: '#2563eb',
+    cargoEn: "High school teacher",
+    employerEn: "Colegio San Bartolomé",
+    codeudorEn: "Hernán Ortiz (father) · retiree who owns real estate",
+    polizaEn: null,
   },
   {
     id: 'a6',
@@ -306,6 +358,10 @@ export const applicants: Applicant[] = [
     codeudor: null,
     poliza: null,
     color: '#65a30d',
+    cargoEn: "Junior support analyst",
+    employerEn: "Konecta Colombia",
+    codeudorEn: null,
+    polizaEn: null,
   },
 ]
 
@@ -313,8 +369,8 @@ export const DEMO_APPLICANT_ID = 'a1'
 
 export const seedApplications: Application[] = [
   // Historial de la persona demo (Laura)
-  { id: 'app-s1', listingId: 'salitre-3h', applicantId: 'a1', status: 'en_revision', createdAt: '2026-09-22T15:10:00-05:00', note: 'Validando autenticidad del certificado laboral con el empleador.' },
-  { id: 'app-s2', listingId: 'cedritos-3h', applicantId: 'a1', status: 'rechazado', createdAt: '2026-09-10T10:00:00-05:00', note: 'El propietario eligió a otro aplicante preaprobado.' },
+  { id: 'app-s1', listingId: 'salitre-3h', applicantId: 'a1', status: 'en_revision', createdAt: '2026-09-22T15:10:00-05:00', note: 'Validando autenticidad del certificado laboral con el empleador.', noteEn: 'Verifying the employment letter with the employer.' },
+  { id: 'app-s2', listingId: 'cedritos-3h', applicantId: 'a1', status: 'rechazado', createdAt: '2026-09-10T10:00:00-05:00', note: 'El propietario eligió a otro aplicante preaprobado.', noteEn: 'The landlord chose another pre-approved applicant.' },
   // Otros aplicantes en el pipeline de los propietarios
   { id: 'app-s3', listingId: 'chapinero-alto-2h', applicantId: 'a3', status: 'preaprobado', createdAt: '2026-09-23T09:30:00-05:00' },
   { id: 'app-s4', listingId: 'chapinero-alto-2h', applicantId: 'a2', status: 'preaprobado', createdAt: '2026-09-21T18:45:00-05:00' },
@@ -361,6 +417,8 @@ export const managedProperties: ManagedProperty[] = [
     name: 'Apto 402 · Chicó Norte',
     barrio: 'Chicó',
     tenantName: 'Daniela Suárez',
+    nameEn: "Apt 402 · Chicó Norte",
+    tenantNameEn: "Daniela Suárez",
     canon: 3_400_000,
     history: history({
       canon: 3_400_000,
@@ -377,6 +435,8 @@ export const managedProperties: ManagedProperty[] = [
     name: 'Apto 301 · Chapinero Central',
     barrio: 'Chapinero',
     tenantName: 'Felipe Castro',
+    nameEn: "Apt 301 · Chapinero Central",
+    tenantNameEn: "Felipe Castro",
     canon: 2_250_000,
     history: history({
       canon: 2_250_000,
@@ -393,6 +453,8 @@ export const managedProperties: ManagedProperty[] = [
     name: 'Casa 12 · Galerías',
     barrio: 'Galerías',
     tenantName: 'Familia Medina',
+    nameEn: "House 12 · Galerías",
+    tenantNameEn: "Medina family",
     canon: 3_050_000,
     history: history({
       canon: 3_050_000,
@@ -409,6 +471,8 @@ export const managedProperties: ManagedProperty[] = [
     name: 'Apto 802 · Santa Bárbara',
     barrio: 'Usaquén',
     tenantName: 'Ricardo Lozano',
+    nameEn: "Apt 802 · Santa Bárbara",
+    tenantNameEn: "Ricardo Lozano",
     canon: 4_700_000,
     history: history({
       canon: 4_700_000,
@@ -425,6 +489,8 @@ export const managedProperties: ManagedProperty[] = [
     name: 'Apto 1104 · Cedritos',
     barrio: 'Cedritos',
     tenantName: 'Natalia Ruiz',
+    nameEn: "Apt 1104 · Cedritos",
+    tenantNameEn: "Natalia Ruiz",
     canon: 2_350_000,
     history: history({
       canon: 2_350_000,
