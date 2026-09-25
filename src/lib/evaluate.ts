@@ -219,7 +219,7 @@ export function evaluate(a: Applicant, l: Listing): Evaluation {
   return { qualified: passedCount === results.length, results, passedCount, incomeRatio }
 }
 
-/** Resumen corto estilo IA para la tarjeta del propietario. / Short AI-style summary for the landlord card. */
+/** Resumen corto del perfil para la tarjeta del propietario. / Short profile summary for the landlord card. */
 export function aiSummary(a: Applicant, l: Listing): string {
   const ev = evaluate(a, l)
   const first = a.name.split(' ')[0]

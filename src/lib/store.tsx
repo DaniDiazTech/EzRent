@@ -13,7 +13,7 @@ export interface AppState {
   applications: Application[]
   /** Documentos cargados por persona: nombre del archivo por tipo. */
   documents: Record<string, Partial<Record<DocType, string>>>
-  /** Personas cuya documentación ya fue revisada por la IA. */
+  /** Personas cuya documentación ya fue revisada por nuestro agente. */
   verified: string[]
   consent: Record<string, string>
 }

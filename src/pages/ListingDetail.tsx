@@ -62,7 +62,7 @@ export function ListingDetail({ id }: { id: string }) {
             <p className="mt-1 text-sm text-stone-600">
               {tr(
                 'Scanned model of the property. Jump between rooms or rotate freely to decide whether an in-person visit is worth it.',
-                'Modelo escaneado del inmueble. Salta entre ambientes o gira libremente para decidir si vale la pena la visita presencial.',
+                'Modelo escaneado del inmueble. Pasa de un espacio a otro o gira libremente para decidir si vale la pena la visita presencial.',
               )}
             </p>
             <div className="mt-4 h-[380px] overflow-hidden rounded-2xl ring-1 ring-stone-200 sm:h-[480px]">
@@ -111,7 +111,10 @@ export function ListingDetail({ id }: { id: string }) {
             <p className="mt-1 text-sm text-stone-600">
               {verified
                 ? tr(`Compared with ${me.name.split(' ')[0]}’s verified documents.`, `Comparados con los documentos verificados de ${me.name.split(' ')[0]}.`)
-                : tr('Upload your documents and the AI will instantly tell you whether you meet each one.', 'Sube tus documentos y la IA te dirá al instante si cumples cada uno.')}
+                : tr(
+                    'Upload your documents and our agent will reply right away with whether you meet each requirement.',
+                    'Sube tus documentos y nuestro agente te responderá de manera inmediata si cumples con cada requisito.',
+                  )}
             </p>
             <ul className="mt-4 divide-y divide-stone-100 rounded-2xl border border-stone-200">
               {reqs.map((r, i) => (
