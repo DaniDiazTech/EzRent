@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { listings } from './data/seed'
 import { Header } from './components/Header'
 import { Applications } from './pages/Applications'
 import { Apply } from './pages/Apply'
@@ -33,7 +34,11 @@ export default function App() {
   else if (match('/aplicaciones', path)) page = <Applications highlight={query(path).get('nueva') ?? undefined} />
   else if (match('/propietario', path)) page = <Pipeline initialListing={query(path).get('inmueble') ?? undefined} />
   else if (match('/propietario/flujo', path)) page = <CashFlow />
-  else page = <Listings />
+  else {
+    const nearbyId = query(path).get('cerca')
+    const nearby = listings.find((listing) => listing.id === nearbyId)
+    page = <Listings key={nearby?.id ?? 'all'} nearby={nearby} />
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

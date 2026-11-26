@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useMemo, useRef } from 'react'
+import { RentalMap } from '../components/RentalMap'
 import { Badge3D, Button, Check, Photo, Spec, StatusPill } from '../components/ui'
 import { applicants, landlords, listings } from '../data/seed'
 import { describeRequirements, evaluate } from '../lib/evaluate'
@@ -6,11 +7,13 @@ import { formatCOP, formatDate } from '../lib/format'
 import { tr } from '../lib/i18n'
 import { navigate } from '../lib/router'
 import { useStore } from '../lib/store'
+import type { Listing } from '../types'
 
 const Tour = lazy(() => import('../tour/Tour'))
 
 export function ListingDetail({ id }: { id: string }) {
   const s = useStore()
+  const locationSection = useRef<HTMLElement>(null)
   const listing = listings.find((l) => l.id === id)
   if (!listing)
     return (
@@ -42,6 +45,12 @@ export function ListingDetail({ id }: { id: string }) {
           `${listing.barrio} · Localidad de ${listing.localidad} · Bogotá D.C. · Estrato ${listing.estrato}`,
         )}
       </p>
+      <button type="button" className="mt-2 text-sm font-bold text-teal-800 underline underline-offset-4" onClick={() => {
+        locationSection.current?.scrollIntoView()
+        locationSection.current?.focus({ preventScroll: true })
+      }}>
+        {tr('See location on map', 'Ver ubicación en el mapa')}
+      </button>
 
       {/* Galería estilo mosaico */}
       <div className="mt-4 grid h-56 grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-80">
@@ -103,6 +112,10 @@ export function ListingDetail({ id }: { id: string }) {
                 </span>
               ))}
             </div>
+          </section>
+
+          <section ref={locationSection} tabIndex={-1} className="mt-10 scroll-mt-32 outline-none" aria-labelledby="listing-location-title">
+            <ListingLocation listing={listing} />
           </section>
 
           {/* Requisitos */}
@@ -257,4 +270,34 @@ export function ListingDetail({ id }: { id: string }) {
       </div>
     )
   }
+}
+
+function ListingLocation({ listing }: { listing: Listing }) {
+  const focus = useMemo(() => [listing.mapLocation], [listing])
+  const pins = useMemo(() => [{
+    id: listing.id, position: listing.mapLocation, price: listing.barrio,
+    title: listing.barrio, active: true, highlighted: false,
+  }], [listing])
+  const { lat, lng } = listing.mapLocation
+  const googleLink = `https://www.google.com/maps/search/?api=1&query=${lat}%2C${lng}`
+
+  return (
+    <>
+      <h2 id="listing-location-title" className="text-xl font-bold">{tr('Explore the neighborhood', 'Explora el barrio')}</h2>
+      <p className="mt-1 text-sm text-stone-600">
+        {tr(`Approximate location in ${listing.barrio}, Bogotá.`, `Ubicación aproximada en ${listing.barrio}, Bogotá.`)}
+      </p>
+      <div className="rental-map-frame mt-4 h-72">
+        <RentalMap focus={focus} pins={pins} />
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-bold text-teal-800">
+        <a className="underline underline-offset-4" href={`#/?cerca=${listing.id}`} onClick={() => window.scrollTo(0, 0)}>
+          {tr('Search rentals nearby', 'Buscar arriendos cerca')}
+        </a>
+        <a className="underline underline-offset-4" href={googleLink} target="_blank" rel="noreferrer">
+          {tr('Open in Google Maps', 'Abrir en Google Maps')} ↗
+        </a>
+      </div>
+    </>
+  )
 }

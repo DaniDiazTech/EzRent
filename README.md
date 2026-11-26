@@ -32,6 +32,17 @@ npm run build      # type-check + production build into dist/
 npm run preview    # serve the production build
 ```
 
+## Rental map
+
+Explore keeps the map pins and rental results in sync. Use the filters above the map, turn on **Search as I move** to limit results to the current viewport, or choose **Draw area** and tap at least three points to search inside a custom boundary. Listing details show an approximate neighborhood location and link to a nearby search.
+
+To use Google Maps, copy `.env.example` to `.env.local` for local development or set the same variables in Vercel before building:
+
+- `VITE_GOOGLE_MAPS_API_KEY`: a browser key for the [Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/get-api-key). Restrict the key to the Maps JavaScript API and the website origins where EzRent runs.
+- `VITE_GOOGLE_MAPS_MAP_ID`: a JavaScript map ID for [advanced markers](https://developers.google.com/maps/documentation/javascript/advanced-markers/start). The app uses Google's `DEMO_MAP_ID` when this value is omitted.
+
+The demo uses OpenStreetMap tiles if the Google key is missing or Google Maps fails to initialize. The sample pins are approximate neighborhood locations.
+
 ## Deploy to Vercel
 
 `vercel.json` is included (framework `vite`, build `npm run build`, output `dist`).
@@ -48,7 +59,7 @@ vercel --prod   # production deployment
 
 ## Demo path
 
-1. **Explorar**: browse 8 listings and filter by barrio, precio and habitaciones. Every card has a "Recorrido 3D" badge.
+1. **Explorar**: browse 8 listings on the map and filter by barrio, precio, habitaciones, baños and parqueadero. Every card has a "Recorrido 3D" badge.
 2. Open **Chapinero**, tour the 3D apartment (Vista general, Sala-comedor, Cocina, Habitación principal, Baño, Habitación 2). You can also tap a room's floor, or use **Cortar muros**.
 3. Click **Verificar si califico**, accept the habeas data consent (Ley 1581 de 2012), upload any files (or tap **Usar documentos de ejemplo**), then **Verificar requisitos** (Check requirements).
 4. After about 3.5 seconds you see the extracted data and a pass/fail result for each requirement. The result says **Calificas**; click **Aplicar a este inmueble**.

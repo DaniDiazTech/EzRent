@@ -1,129 +1,191 @@
 import { useMemo, useState } from 'react'
 import { ListingCard } from '../components/ListingCard'
+import { ListingMapSearch } from '../components/ListingMapSearch'
 import { applicants, listings } from '../data/seed'
 import { evaluate } from '../lib/evaluate'
-import { formatCOP } from '../lib/format'
 import { tr } from '../lib/i18n'
+import { inBounds, inPolygon, type MapBounds, type MapPoint } from '../lib/mapArea'
 import { useStore } from '../lib/store'
+import type { Listing } from '../types'
 
-const BARRIOS = Array.from(new Set(listings.map((l) => l.barrio)))
+const BARRIOS = [...new Set(listings.map((listing) => listing.barrio))].sort((a, b) => a.localeCompare(b, 'es-CO'))
+const CITY = listings.map((listing) => listing.mapLocation)
 const PRICE_STEPS = [
-  { label: 'Cualquier precio', labelEn: 'Any price', max: Infinity },
+  { label: 'Cualquier precio', labelEn: 'Any rent', max: Infinity },
   { label: 'Hasta $1,8 M', labelEn: 'Up to $1.8M', max: 1_800_000 },
   { label: 'Hasta $2,5 M', labelEn: 'Up to $2.5M', max: 2_500_000 },
   { label: 'Hasta $3 M', labelEn: 'Up to $3M', max: 3_000_000 },
   { label: 'Hasta $4 M', labelEn: 'Up to $4M', max: 4_000_000 },
+  { label: 'Hasta $6 M', labelEn: 'Up to $6M', max: 6_000_000 },
 ]
+const monthlyCost = (listing: Listing) => listing.canon + listing.administracion
 
-export function Listings() {
+export function Listings({ nearby }: { nearby?: Listing }) {
   const s = useStore()
-  const [barrio, setBarrio] = useState<string>('')
+  const [barrio, setBarrio] = useState('')
   const [price, setPrice] = useState(0)
   const [rooms, setRooms] = useState(0)
+  const [baths, setBaths] = useState(0)
+  const [parking, setParking] = useState(false)
   const [onlyFit, setOnlyFit] = useState(false)
+  const [sort, setSort] = useState('')
+  const [view, setView] = useState<'map' | 'list'>('map')
+  const [selectedId, setSelectedId] = useState(nearby?.id ?? '')
+  const [highlighted, setHighlighted] = useState('')
+  const [focus, setFocus] = useState(nearby ? [nearby.mapLocation] : CITY)
+  const [bounds, setBounds] = useState<MapBounds>()
+  const [visibleOnly, setVisibleOnly] = useState(true)
+  const [area, setArea] = useState<MapPoint[]>([])
 
   const me = applicants.find((a) => a.id === s.applicantId)!
   const verified = s.verified.includes(me.id)
+  const filterByQualification = verified && onlyFit
+  const fits = useMemo(() => new Set(listings.filter((listing) => evaluate(me, listing).qualified).map((listing) => listing.id)), [me])
 
-  const filtered = useMemo(
-    () =>
-      listings.filter(
-        (l) =>
-          (!barrio || l.barrio === barrio) &&
-          l.canon <= PRICE_STEPS[price].max &&
-          l.habitaciones >= rooms &&
-          (!onlyFit || !verified || evaluate(me, l).qualified),
-      ),
-    [barrio, price, rooms, onlyFit, verified, me],
-  )
+  const filtered = useMemo(() => listings.filter((listing) =>
+    (!barrio || listing.barrio === barrio) &&
+    listing.canon <= PRICE_STEPS[price].max &&
+    listing.habitaciones >= rooms &&
+    listing.banos >= baths &&
+    (!parking || listing.parqueaderos > 0) &&
+    (!filterByQualification || fits.has(listing.id)),
+  ), [barrio, price, rooms, baths, parking, filterByQualification, fits])
+  const inArea = useMemo(() => filtered.filter((listing) =>
+    (!area.length || inPolygon(listing.mapLocation, area)) &&
+    (!visibleOnly || !bounds || inBounds(listing.mapLocation, bounds)),
+  ), [filtered, area, visibleOnly, bounds])
+  const results = useMemo(() => {
+    if (sort === 'low') return [...inArea].sort((a, b) => monthlyCost(a) - monthlyCost(b))
+    if (sort === 'high') return [...inArea].sort((a, b) => monthlyCost(b) - monthlyCost(a))
+    return inArea
+  }, [inArea, sort])
 
-  const fitCount = verified ? listings.filter((l) => evaluate(me, l).qualified).length : 0
+  function reset() {
+    setBarrio('')
+    setPrice(0)
+    setRooms(0)
+    setBaths(0)
+    setParking(false)
+    setOnlyFit(false)
+    setArea([])
+    setVisibleOnly(true)
+    setSelectedId('')
+    setBounds(undefined)
+    setFocus([...CITY])
+  }
+
+  function selectNeighborhood(value: string) {
+    setBarrio(value)
+    setArea([])
+    setSelectedId('')
+    setBounds(undefined)
+    setFocus(value ? listings.filter((listing) => listing.barrio === value).map((listing) => listing.mapLocation) : [...CITY])
+  }
+
+  const narrowed = Boolean(barrio || price || rooms || baths || parking || filterByQualification || area.length)
+  const resultCount = results.length === 1 ? tr('1 rental', '1 inmueble') : tr(`${results.length} rentals`, `${results.length} inmuebles`)
 
   return (
     <div>
-      <section className="border-b border-stone-100 bg-gradient-to-b from-teal-50/70 to-white">
-        <div className="mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-6 sm:pt-12">
-          <h1 className="max-w-2xl text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">
-            {tr('Apply before you visit. ', 'Aplica antes de visitar. ')}
-            <span className="text-teal-700">{tr('Only visit where you qualify.', 'Visita solo donde calificas.')}</span>
+      <section className="border-b border-teal-100 bg-gradient-to-br from-teal-50 to-white">
+        <div className="mx-auto max-w-[1500px] px-4 py-4 sm:px-6 sm:py-8">
+          <h1 className="text-[26px] leading-tight font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+            {tr('Find rentals in ', 'Encuentra arriendos en ')}<span className="text-teal-800">Bogotá</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-stone-600">
-            {tr(
-              'Upload your documents once and our agent will reply right away with whether you meet each landlord’s requirements. Then tour every apartment in 3D before leaving home.',
-              'Sube tus documentos una vez y nuestro agente te responderá de manera inmediata si cumples con los requisitos de cada propietario. Además, recorre cada apartamento en 3D antes de moverte.',
-            )}
+          <p className="mt-2 text-sm text-stone-600 sm:text-base">
+            {tr('Find your neighborhood, see where you qualify, and tour in 3D before visiting.', 'Encuentra tu barrio, revisa dónde calificas y recorre el inmueble en 3D antes de visitar.')}
           </p>
-          {verified ? (
-            <div className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm shadow-sm ring-1 ring-teal-100">
-              <span className="font-bold text-teal-800">{tr('✓ Documents verified', '✓ Documentos verificados')}</span>
-              <span className="text-stone-600">
-                {tr(`You qualify for ${fitCount} of ${listings.length} places.`, `Calificas en ${fitCount} de ${listings.length} inmuebles.`)}
-              </span>
-              <label className="ml-1 inline-flex items-center gap-2 font-semibold text-stone-800">
-                <input type="checkbox" checked={onlyFit} onChange={(e) => setOnlyFit(e.target.checked)} className="h-4 w-4 accent-teal-700" />
-                {tr('Only show places where I qualify', 'Ver solo donde califico')}
-              </label>
-            </div>
-          ) : (
-            <div className="mt-5 flex flex-wrap gap-4 text-sm text-stone-600">
-              <span>{tr('① Upload your documents just once', '① Sube tus documentos una sola vez')}</span>
-              <span>{tr('② Our agent tells you right away if you meet the requirements', '② Nuestro agente te responde al instante si cumples los requisitos')}</span>
-              <span>{tr('③ Tour in 3D and book the visit', '③ Recorre en 3D y agenda la visita')}</span>
-            </div>
-          )}
+          {verified && <p className="mt-3 text-sm font-bold text-teal-800">
+            {tr(`Documents verified · You qualify for ${fits.size} of ${listings.length} rentals`, `Documentos verificados · Calificas en ${fits.size} de ${listings.length} inmuebles`)}
+          </p>}
         </div>
       </section>
 
-      <div className="sticky top-[105px] z-30 border-b border-stone-100 bg-white/95 backdrop-blur md:top-[65px]">
-        <div className="no-scrollbar mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6">
-          <select value={barrio} onChange={(e) => setBarrio(e.target.value)} className="shrink-0 rounded-full border border-stone-300 bg-white px-3.5 py-2 text-sm font-semibold" aria-label={tr('Neighborhood', 'Barrio')}>
+      <div className="border-b border-stone-200 bg-white">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-2 px-4 py-3 sm:px-6">
+          <select value={barrio} onChange={(event) => selectNeighborhood(event.target.value)} className="rental-filter" aria-label={tr('Neighborhood', 'Barrio')}>
             <option value="">{tr('All neighborhoods', 'Todos los barrios')}</option>
-            {BARRIOS.map((b) => (
-              <option key={b}>{b}</option>
-            ))}
+            {BARRIOS.map((name) => <option key={name}>{name}</option>)}
           </select>
-          <select value={price} onChange={(e) => setPrice(Number(e.target.value))} className="shrink-0 rounded-full border border-stone-300 bg-white px-3.5 py-2 text-sm font-semibold" aria-label={tr('Price', 'Precio')}>
-            {PRICE_STEPS.map((p, i) => (
-              <option key={p.label} value={i}>
-                {tr(p.labelEn, p.label)}
-              </option>
-            ))}
+          <select value={price} onChange={(event) => setPrice(Number(event.target.value))} className="rental-filter" aria-label={tr('Maximum monthly rent', 'Canon mensual máximo')}>
+            {PRICE_STEPS.map((step, index) => <option key={step.label} value={index}>{tr(step.labelEn, step.label)}</option>)}
           </select>
-          <div className="flex shrink-0 items-center gap-1 rounded-full border border-stone-300 p-1" role="group" aria-label={tr('Bedrooms', 'Habitaciones')}>
-            {[0, 1, 2, 3].map((n) => (
-              <button
-                key={n}
-                onClick={() => setRooms(n)}
-                className={`rounded-full px-3 py-1 text-sm font-semibold ${rooms === n ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'}`}
-              >
-                {n === 0 ? tr('Beds', 'Hab.') : `${n}+`}
-              </button>
-            ))}
-          </div>
-          {(barrio || price || rooms || onlyFit) ? (
-            <button onClick={() => (setBarrio(''), setPrice(0), setRooms(0), setOnlyFit(false))} className="shrink-0 px-2 text-sm font-semibold text-teal-700 underline">
-              {tr('Clear', 'Limpiar')}
-            </button>
-          ) : null}
-          <span className="ml-auto shrink-0 pl-2 text-sm text-stone-500">{tr(`${filtered.length} places`, `${filtered.length} inmuebles`)}</span>
+          <select value={rooms} onChange={(event) => setRooms(Number(event.target.value))} className="rental-filter" aria-label={tr('Bedrooms', 'Habitaciones')}>
+            <option value={0}>{tr('Beds', 'Hab.')}</option>
+            {[1, 2, 3].map((n) => <option key={n} value={n}>{tr(`${n}+ beds`, `${n}+ hab.`)}</option>)}
+          </select>
+          <select value={baths} onChange={(event) => setBaths(Number(event.target.value))} className="rental-filter" aria-label={tr('Bathrooms', 'Baños')}>
+            <option value={0}>{tr('Baths', 'Baños')}</option>
+            {[1, 2, 3].map((n) => <option key={n} value={n}>{tr(`${n}+ baths`, `${n}+ baños`)}</option>)}
+          </select>
+          <label className="rental-filter">
+            <input type="checkbox" className="h-4 w-4 accent-teal-700" checked={parking} onChange={(event) => setParking(event.target.checked)} />
+            {tr('Parking', 'Parqueadero')}
+          </label>
+          {verified && <label className="rental-filter">
+            <input type="checkbox" className="h-4 w-4 accent-teal-700" checked={filterByQualification} onChange={(event) => setOnlyFit(event.target.checked)} />
+            {tr('Only show places where I qualify', 'Ver solo donde califico')}
+          </label>}
+          {narrowed && <button className="px-2 py-2 text-sm font-semibold text-teal-800 underline" onClick={reset}>{tr('Clear filters', 'Limpiar filtros')}</button>}
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-stone-300 p-10 text-center text-stone-500">
-            {tr(
-              `No places match those filters. Try another neighborhood or a price up to ${formatCOP(4_000_000)}.`,
-              `No hay inmuebles con esos filtros. Prueba con otro barrio o un precio hasta ${formatCOP(4_000_000)}.`,
+      <div className="mx-auto max-w-[1500px] px-4 pb-8 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 py-4">
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <h2 className="text-lg font-extrabold" aria-live="polite">{resultCount}</h2>
+            <span className="text-xs text-stone-600">
+              {area.length ? tr('in drawn area', 'en la zona dibujada') : visibleOnly && bounds ? tr('in map view', 'en el mapa') : ''}
+            </span>
+          </div>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <select value={sort} onChange={(event) => setSort(event.target.value)} className={`rental-filter ${view === 'map' ? 'rental-sort-map' : ''}`} aria-label={tr('Sort rentals', 'Ordenar inmuebles')}>
+              <option value="">{tr('Recommended', 'Recomendados')}</option>
+              <option value="low">{tr('Lowest monthly total', 'Menor total mensual')}</option>
+              <option value="high">{tr('Highest monthly total', 'Mayor total mensual')}</option>
+            </select>
+            <div className="rental-view-toggle inline-flex lg:hidden" role="group" aria-label={tr('Results view', 'Vista de resultados')}>
+              <button type="button" aria-pressed={view === 'map'} onClick={() => setView('map')}>{tr('Map', 'Mapa')}</button>
+              <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>{tr('List', 'Lista')}</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
+          <div className={`min-w-0 lg:sticky lg:top-20 lg:block lg:self-start ${view === 'list' ? 'max-lg:invisible max-lg:absolute max-lg:inset-x-0' : ''}`}>
+            <ListingMapSearch
+              focus={focus} listings={results} selected={results.find((listing) => listing.id === selectedId)}
+              highlighted={highlighted} onSelect={setSelectedId} onMove={setBounds}
+              visibleOnly={visibleOnly} onVisibleOnly={setVisibleOnly} area={area} onArea={setArea}
+              onFit={() => setFocus(filtered.length ? filtered.map((listing) => listing.mapLocation) : [...CITY])}
+            />
+          </div>
+          <div className={`min-w-0 lg:block ${view === 'map' && results.length ? 'hidden' : ''}`}>
+            {results.length ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {results.map((listing) => (
+                  <div key={listing.id}
+                    className={`rental-result ${selectedId === listing.id ? 'rental-result-active' : ''}`}
+                    onMouseEnter={() => setHighlighted(listing.id)}
+                    onMouseLeave={() => setHighlighted('')}
+                    onFocus={() => setHighlighted(listing.id)}
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget)) setHighlighted('')
+                    }}
+                  >
+                    <ListingCard listing={listing} fit={verified ? fits.has(listing.id) : null} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-stone-300 px-5 py-10 text-center">
+                <h3 className="font-extrabold">{tr('No rentals found', 'No encontramos inmuebles')}</h3>
+                <p className="mt-2 text-sm text-stone-600">{tr('Try a wider area or adjust your filters.', 'Prueba con una zona más amplia o ajusta los filtros.')}</p>
+                <button onClick={reset} className="mt-4 text-sm font-bold text-teal-800 underline">{tr('Reset search', 'Restablecer búsqueda')}</button>
+              </div>
             )}
           </div>
-        ) : (
-          <div className="grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((l) => (
-              <ListingCard key={l.id} listing={l} fit={verified ? evaluate(me, l).qualified : null} />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   )
