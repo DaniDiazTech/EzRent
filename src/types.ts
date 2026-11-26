@@ -1,3 +1,5 @@
+import type { MapPoint } from './lib/mapArea'
+
 export type Role = 'arrendatario' | 'propietario'
 
 export type ContractType = 'indefinido' | 'fijo' | 'prestacion_servicios' | 'independiente'
@@ -23,6 +25,8 @@ export interface Listing {
   title: string
   barrio: string
   localidad: string
+  /** Approximate neighborhood location for the demo listing. */
+  mapLocation: MapPoint
   estrato: number
   areaM2: number
   habitaciones: number

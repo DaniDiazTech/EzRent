@@ -42,7 +42,7 @@ export function Header({ path }: { path: string }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-3 sm:px-6">
         <a href="#/" onClick={(e) => (e.preventDefault(), switchRole('arrendatario'), navigate('/'))} className="shrink-0">
           <Logo />
         </a>
@@ -59,28 +59,28 @@ export function Header({ path }: { path: string }) {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
-          <div className="flex rounded-full border border-stone-200 p-0.5 text-[11px] font-bold sm:text-xs" role="group" aria-label={tr('Language', 'Idioma')}>
+        <div className="ml-auto flex min-w-0 flex-wrap justify-end gap-1 sm:items-center sm:gap-2">
+          <div className="flex rounded-full border border-stone-200 p-0.5 text-[10px] font-bold sm:text-xs" role="group" aria-label={tr('Language', 'Idioma')}>
             {(['en', 'es'] as const).map((l) => (
               <button
                 key={l}
                 onClick={() => s.setLang(l)}
                 aria-pressed={s.lang === l}
                 title={l === 'en' ? 'English' : 'Español'}
-                className={`rounded-full px-2 py-1 transition ${s.lang === l ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-800'}`}
+                className={`rounded-full px-1.5 py-1 transition sm:px-2 ${s.lang === l ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-800'}`}
               >
                 {l.toUpperCase()}
               </button>
             ))}
           </div>
-          <div className="flex rounded-full bg-stone-100 p-1 text-xs font-bold sm:text-sm" role="tablist" aria-label={tr('Switch role', 'Cambiar rol')}>
+          <div className="flex rounded-full bg-stone-100 p-1 text-[11px] font-bold sm:text-sm" role="tablist" aria-label={tr('Switch role', 'Cambiar rol')}>
             {(['arrendatario', 'propietario'] as Role[]).map((r) => (
               <button
                 key={r}
                 role="tab"
                 aria-selected={s.role === r}
                 onClick={() => switchRole(r)}
-                className={`rounded-full px-3 py-1.5 transition sm:px-4 ${s.role === r ? 'bg-white text-teal-800 shadow-sm' : 'text-stone-500 hover:text-stone-800'}`}
+                className={`rounded-full px-2 py-1.5 transition sm:px-4 ${s.role === r ? 'bg-white text-teal-800 shadow-sm' : 'text-stone-500 hover:text-stone-800'}`}
               >
                 {r === 'arrendatario' ? tr('Tenant', 'Arrendatario') : tr('Landlord', 'Propietario')}
               </button>
@@ -134,7 +134,7 @@ export function Header({ path }: { path: string }) {
         <select
           value={s.role === 'arrendatario' ? s.applicantId : s.landlordId}
           onChange={(e) => (s.role === 'arrendatario' ? s.setApplicant(e.target.value) : s.setLandlord(e.target.value))}
-          className="ml-auto max-w-[45%] shrink truncate rounded-full border border-stone-200 bg-white px-2 py-1.5 text-xs font-semibold"
+          className="ml-auto min-w-0 max-w-[45%] shrink truncate rounded-full border border-stone-200 bg-white px-2 py-1.5 text-xs font-semibold"
           aria-label={tr('Demo profile', 'Perfil demo')}
         >
           {(s.role === 'arrendatario' ? applicants : landlords).map((p) => (

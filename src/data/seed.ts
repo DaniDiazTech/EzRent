@@ -28,6 +28,7 @@ export const landlords: Landlord[] = [
 export const listings: Listing[] = [
   {
     id: 'chapinero-alto-2h',
+    mapLocation: { lat: 4.6374, lng: -74.0593 },
     title: 'Apartamento iluminado con balcón en Chapinero Alto',
     barrio: 'Chapinero',
     localidad: 'Chapinero',
@@ -54,6 +55,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'teusaquillo-3h',
+    mapLocation: { lat: 4.6238, lng: -74.0737 },
     title: 'Apartamento amplio en conjunto tradicional de Teusaquillo',
     barrio: 'Teusaquillo',
     localidad: 'Teusaquillo',
@@ -80,6 +82,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'usaquen-santa-barbara',
+    mapLocation: { lat: 4.702, lng: -74.0382 },
     title: 'Apartamento de lujo en Santa Bárbara, Usaquén',
     barrio: 'Usaquén',
     localidad: 'Usaquén',
@@ -106,6 +109,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'cedritos-3h',
+    mapLocation: { lat: 4.7295, lng: -74.0413 },
     title: 'Apartamento familiar en Cedritos con parqueadero',
     barrio: 'Cedritos',
     localidad: 'Usaquén',
@@ -132,6 +136,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'la-soledad-2h',
+    mapLocation: { lat: 4.6331, lng: -74.0776 },
     title: 'Apartamento remodelado frente al Park Way, La Soledad',
     barrio: 'La Soledad',
     localidad: 'Teusaquillo',
@@ -158,6 +163,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'galerias-1h',
+    mapLocation: { lat: 4.6437, lng: -74.0722 },
     title: 'Apartaestudio moderno cerca a Galerías',
     barrio: 'Galerías',
     localidad: 'Teusaquillo',
@@ -184,6 +190,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'salitre-3h',
+    mapLocation: { lat: 4.6528, lng: -74.1077 },
     title: 'Apartamento en Ciudad Salitre cerca a El Dorado',
     barrio: 'Salitre',
     localidad: 'Fontibón',
@@ -210,6 +217,7 @@ export const listings: Listing[] = [
   },
   {
     id: 'suba-3h',
+    mapLocation: { lat: 4.7489, lng: -74.0993 },
     title: 'Apartamento con vista en Suba, sector Pinar',
     barrio: 'Suba',
     localidad: 'Suba',
