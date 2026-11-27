@@ -151,7 +151,7 @@ export function Listings({ nearby }: { nearby?: Listing }) {
           </div>
         </div>
 
-        <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
+        <div className="rental-split relative grid gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
           <div className={`min-w-0 lg:sticky lg:top-20 lg:block lg:self-start ${view === 'list' ? 'max-lg:invisible max-lg:absolute max-lg:inset-x-0' : ''}`}>
             <ListingMapSearch
               focus={focus} listings={results} selected={results.find((listing) => listing.id === selectedId)}
@@ -160,7 +160,12 @@ export function Listings({ nearby }: { nearby?: Listing }) {
               onFit={() => setFocus(filtered.length ? filtered.map((listing) => listing.mapLocation) : [...CITY])}
             />
           </div>
-          <div className={`min-w-0 lg:block ${view === 'map' && results.length ? 'hidden' : ''}`}>
+          <div
+            className={`rental-results min-w-0 lg:block ${view === 'map' && results.length ? 'hidden' : ''}`}
+            role="region"
+            aria-label={tr('Rental results', 'Resultados de inmuebles')}
+            tabIndex={0}
+          >
             {results.length ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 {results.map((listing) => (

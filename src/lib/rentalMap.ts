@@ -1,4 +1,5 @@
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
+import type { FeatureCollection } from 'geojson'
 import type { MapBounds, MapPoint } from './mapArea'
 
 export interface RentalPin {
@@ -14,6 +15,7 @@ interface MapEvents {
   move: (bounds: MapBounds) => void
   click: (point: MapPoint) => void
   select: (id: string) => void
+  overview: (visible: boolean) => void
 }
 
 export interface MapSurface {
@@ -127,16 +129,64 @@ export async function prepareGoogleMap() {
   }
 }
 
+const OVERVIEW_LABELS = [
+  { name: 'Suba', position: { lat: 4.7455, lng: -74.0993 } },
+  { name: 'Cedritos', position: { lat: 4.7255, lng: -74.0413 } },
+  { name: 'Usaquén', position: { lat: 4.6975, lng: -74.0382 } },
+  { name: 'Ciudad Salitre', position: { lat: 4.6468, lng: -74.1087 } },
+  { name: 'Chapinero', position: { lat: 4.6325, lng: -74.0543 } },
+  { name: 'Teusaquillo', position: { lat: 4.619, lng: -74.076 } },
+  { name: 'Bogotá', position: { lat: 4.5981, lng: -74.0758 } },
+]
+
+const OVERVIEW_STYLES: Record<string, L.PathOptions> = {
+  park: { fillColor: '#bfdbb7', fillOpacity: 1, stroke: false },
+  water: { fillColor: '#aecfdb', fillOpacity: 1, stroke: false },
+  waterway: { color: '#9bc5d6', weight: 1.6, opacity: 1 },
+  minor: { color: '#fff', weight: 1.2, opacity: 1 },
+  major: { color: '#b9b6a6', weight: 1.6, opacity: 1 },
+}
+
 export async function prepareOpenStreetMap() {
-  const L = await import('leaflet')
-  await import('leaflet/dist/leaflet.css')
+  const [L, { default: overview }] = await Promise.all([
+    import('leaflet'), import('../data/bogotaOverview.geojson?raw'), import('leaflet/dist/leaflet.css'),
+  ])
+  const geometry: FeatureCollection = JSON.parse(overview)
   return (container: HTMLElement, events: MapEvents): MapSurface => {
     const map = L.map(container, {
       zoomControl: false, scrollWheelZoom: false, maxZoom: 19, worldCopyJump: true,
     })
     L.control.zoom({ position: 'bottomright' }).addTo(map)
+    map.attributionControl.setPrefix(false)
+    // The local overview sits behind the live tiles so missing tiles still show real geography.
+    const pane = map.createPane('bogota-overview')
+    pane.style.zIndex = '190'
+    pane.style.pointerEvents = 'none'
+    const renderer = L.canvas({ pane: 'bogota-overview' }) ?? undefined
+    L.geoJSON(geometry, {
+      pane: 'bogota-overview',
+      interactive: false,
+      style: (feature) => ({ renderer, ...OVERVIEW_STYLES[feature?.properties?.kind ?? 'major'] }),
+    }).addTo(map)
+    for (const label of OVERVIEW_LABELS) {
+      const text = document.createElement('span')
+      text.textContent = label.name
+      L.marker(label.position, {
+        pane: 'bogota-overview',
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({ html: text, className: 'rental-place-label', iconSize: [92, 15] }),
+      }).addTo(map)
+    }
+    const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    const vectorAttribution = '<a href="https://openfreemap.org/">OpenFreeMap</a> · &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>'
+    map.attributionControl.addAttribution(vectorAttribution)
+    events.overview(true)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution,
+      referrerPolicy: 'strict-origin-when-cross-origin',
+    }).once('tileload', () => {
+      events.overview(false)
     }).addTo(map)
     const layer = L.layerGroup().addTo(map)
     const markers = new Map<string, { marker: L.Marker; content: HTMLElement }>()

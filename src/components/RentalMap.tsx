@@ -20,6 +20,7 @@ export function RentalMap({ focus, pins, outline, drawing, onMove, onClick, onSe
   const [provider, setProvider] = useState(googleMapsKey ? 'google' : 'osm')
   const [surface, setSurface] = useState<MapSurface>()
   const [failed, setFailed] = useState(false)
+  const [showOverview, setShowOverview] = useState(false)
   const onMapMove = useEffectEvent((bounds: MapBounds) => onMove?.(bounds))
   const onMapClick = useEffectEvent((point: MapPoint) => onClick?.(point))
   const onPinSelect = useEffectEvent((id: string) => onSelect?.(id))
@@ -40,6 +41,7 @@ export function RentalMap({ focus, pins, outline, drawing, onMove, onClick, onSe
         move: (bounds) => onMapMove(bounds),
         click: (point) => onMapClick(point),
         select: (id) => onPinSelect(id),
+        overview: (visible) => { if (!cancelled) setShowOverview(visible) },
       })
       setSurface(instance)
     }).catch(() => {
@@ -62,6 +64,11 @@ export function RentalMap({ focus, pins, outline, drawing, onMove, onClick, onSe
   return (
     <>
       <div ref={container} className={`rental-map-canvas ${drawing ? 'rental-map-drawing' : ''}`} role="region" aria-label={tr('Rental map', 'Mapa de inmuebles')} />
+      {surface && showOverview && (
+        <p className="rental-map-overview" role="status">
+          {tr('Bogotá overview', 'Vista general de Bogotá')}
+        </p>
+      )}
       {!surface && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-teal-50 text-sm font-semibold text-teal-900" role="status">
           {failed ? tr('Map unavailable', 'Mapa no disponible') : tr('Loading map…', 'Cargando mapa…')}

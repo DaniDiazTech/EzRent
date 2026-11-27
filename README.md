@@ -41,7 +41,7 @@ To use Google Maps, copy `.env.example` to `.env.local` for local development or
 - `VITE_GOOGLE_MAPS_API_KEY`: a browser key for the [Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/get-api-key). Restrict the key to the Maps JavaScript API and the website origins where EzRent runs.
 - `VITE_GOOGLE_MAPS_MAP_ID`: a JavaScript map ID for [advanced markers](https://developers.google.com/maps/documentation/javascript/advanced-markers/start). The app uses Google's `DEMO_MAP_ID` when this value is omitted.
 
-The demo uses OpenStreetMap tiles if the Google key is missing or Google Maps fails to initialize. The sample pins are approximate neighborhood locations.
+The demo uses OpenStreetMap tiles if the Google key is missing or Google Maps fails to initialize. A bundled Bogotá overview appears behind slow or unavailable street tiles. It contains simplified roads, parks and waterways from the 2026-11-22 [OpenFreeMap](https://openfreemap.org/) OpenMapTiles extract. The data is derived from [OpenStreetMap](https://www.openstreetmap.org/copyright) under the Open Database License. The sample pins are approximate neighborhood locations.
 
 ## Deploy to Vercel
 
