@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useRef } from 'react'
+import { ListingGallery } from '../components/ListingGallery'
 import { RentalMap } from '../components/RentalMap'
-import { Badge3D, Button, Check, Photo, Spec, StatusPill } from '../components/ui'
+import { Badge3D, Button, Check, Spec, StatusPill } from '../components/ui'
 import { applicants, landlords, listings } from '../data/seed'
 import { describeRequirements, evaluate } from '../lib/evaluate'
 import { formatCOP, formatDate } from '../lib/format'
@@ -52,13 +53,7 @@ export function ListingDetail({ id }: { id: string }) {
         {tr('See location on map', 'Ver ubicación en el mapa')}
       </button>
 
-      {/* Galería estilo mosaico */}
-      <div className="mt-4 grid h-56 grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-80">
-        <Photo src={listing.photos[0]} alt={tr(listing.titleEn, listing.title)} className="col-span-4 row-span-2 h-full w-full sm:col-span-2" />
-        {listing.photos.slice(1, 4).map((p, i) => (
-          <Photo key={i} src={p} alt={tr(`${listing.titleEn} photo ${i + 2}`, `${listing.title} foto ${i + 2}`)} className={`hidden h-full w-full sm:block ${i === 2 ? 'col-span-2' : ''}`} />
-        ))}
-      </div>
+      <ListingGallery photos={listing.photos} title={tr(listing.titleEn, listing.title)} />
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
         <div className="min-w-0">

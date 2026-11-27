@@ -17,7 +17,7 @@ export function Logo({ className = '' }: { className?: string }) {
   )
 }
 
-export function Photo({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+export function Photo({ src, alt, className = '', fit = 'cover' }: { src: string; alt: string; className?: string; fit?: 'cover' | 'contain' }) {
   const [failed, setFailed] = useState(false)
   if (failed)
     return (
@@ -27,7 +27,7 @@ export function Photo({ src, alt, className = '' }: { src: string; alt: string; 
         </svg>
       </div>
     )
-  return <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} className={`object-cover ${className}`} />
+  return <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} className={`${fit === 'contain' ? 'object-contain' : 'object-cover'} ${className}`} />
 }
 
 export function Badge3D({ className = '' }: { className?: string }) {
