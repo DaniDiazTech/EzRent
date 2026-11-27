@@ -71,7 +71,7 @@ Use the profile selector in the header to try other applicants. For example, *Ca
 
 ### Matching and signing demo
 
-Select **Santiago Pérez Luna** and open **My applications**. **Torre Olaya** is ready to sign. Review his screening report, open the operator profile, or sign the demo lease and see the status update. **Explore → Show my matches** ranks his eligible options and puts sign-ready applications first. Use **Laura Gómez Restrepo** on a different listing to demo document verification from the beginning. All records and signatures are simulated and saved in this browser.
+Select **Santiago Pérez Luna** and open **My applications**. **Torre Olaya** is ready to sign. Review his screening report, open the operator profile, or review the rental agreement PDF, draw or type a signature, and download the signed copy. **Explore → Show my matches** ranks his eligible options and puts sign-ready applications first. Use **Laura Gómez Restrepo** on a different listing to demo document verification from the beginning. The prototype stores agreement terms and signatures in the browser.
 
 ## Seed data
 

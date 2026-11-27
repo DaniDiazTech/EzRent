@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { applicants, DEMO_APPLICANT_ID, listings, seedApplications } from '../data/seed'
-import type { Application, ApplicationStatus, DocType, Role } from '../types'
+import type { Application, ApplicationStatus, DocType, LeaseSignature, LeaseTerms, Role } from '../types'
 import { evaluate } from './evaluate'
 import { DEFAULT_LANG, setLang as setActiveLang, type Lang } from './i18n'
 
@@ -65,7 +65,7 @@ interface Store extends AppState {
   setDocuments: (docs: Partial<Record<DocType, string>>) => void
   markVerified: () => void
   apply: (listingId: string) => boolean
-  signLease: (applicationId: string) => void
+  signLease: (applicationId: string, terms: LeaseTerms, signature: LeaseSignature) => void
   setStatus: (applicationId: string, status: ApplicationStatus) => void
   reset: () => void
 }
@@ -126,13 +126,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })),
     [],
   )
-  const signLease = useCallback((id: string) => {
-    const signedAt = new Date().toISOString()
+  const signLease = useCallback((id: string, terms: LeaseTerms, signature: LeaseSignature) => {
+    const capturedAt = new Date().toISOString()
     setState((s) => ({
       ...s,
       applications: s.applications.map((app) =>
-        app.id === id && app.applicantId === s.applicantId && app.status === 'aceptado'
-          ? { ...app, status: 'firmado', signedAt }
+        app.id === id && app.applicantId === s.applicantId && !app.signedLease &&
+        (app.status === 'aceptado' || app.status === 'firmado')
+          ? { ...app, status: 'firmado', signedAt: app.signedAt ?? capturedAt, signedLease: { terms, signature, capturedAt } }
           : app,
       ),
     }))

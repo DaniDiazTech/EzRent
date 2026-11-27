@@ -1,17 +1,18 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { listings } from './data/seed'
 import { Header } from './components/Header'
 import { Applications } from './pages/Applications'
 import { Apply } from './pages/Apply'
 import { CashFlow } from './pages/CashFlow'
 import { LandlordProfile } from './pages/LandlordProfile'
-import { Lease } from './pages/Lease'
 import { ListingDetail } from './pages/ListingDetail'
 import { Listings } from './pages/Listings'
 import { Pipeline } from './pages/Pipeline'
 import { match, useRoute } from './lib/router'
 import { tr } from './lib/i18n'
 import { useStore } from './lib/store'
+
+const Lease = lazy(() => import('./pages/Lease'))
 
 function query(path: string) {
   return new URLSearchParams(path.split('?')[1] ?? '')
@@ -34,7 +35,7 @@ export default function App() {
   if ((m = match('/inmueble/:id', path))) page = <ListingDetail key={m.id} id={m.id} showTour={query(path).get('vista') === 'recorrido'} />
   else if ((m = match('/aplicar/:id', path))) page = <Apply key={m.id} id={m.id} />
   else if ((m = match('/arrendador/:id', path))) page = <LandlordProfile key={m.id} id={m.id} />
-  else if ((m = match('/contrato/:id', path))) page = <Lease key={m.id} id={m.id} />
+  else if ((m = match('/contrato/:id', path))) page = <Suspense fallback={<p role="status" className="p-8 text-center text-stone-600">{tr('Loading agreement…', 'Cargando contrato…')}</p>}><Lease key={m.id} id={m.id} /></Suspense>
   else if (match('/aplicaciones', path)) page = <Applications highlight={query(path).get('nueva') ?? undefined} />
   else if (match('/propietario', path)) page = <Pipeline initialListing={query(path).get('inmueble') ?? undefined} />
   else if (match('/propietario/flujo', path)) page = <CashFlow />
