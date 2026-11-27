@@ -44,7 +44,8 @@ export function Badge3D({ className = '' }: { className?: string }) {
 const statusStyles: Record<ApplicationStatus, { label: string; labelEn: string; cls: string }> = {
   en_revision: { label: 'En revisión', labelEn: 'Under review', cls: 'bg-amber-50 text-amber-800 ring-amber-200' },
   preaprobado: { label: 'Preaprobado', labelEn: 'Pre-approved', cls: 'bg-teal-50 text-teal-800 ring-teal-200' },
-  aceptado: { label: 'Aceptado', labelEn: 'Accepted', cls: 'bg-emerald-600 text-white ring-emerald-700' },
+  aceptado: { label: 'Listo para firmar', labelEn: 'Ready to sign', cls: 'bg-emerald-600 text-white ring-emerald-700' },
+  firmado: { label: 'Contrato firmado', labelEn: 'Lease signed', cls: 'bg-stone-900 text-white ring-stone-900' },
   rechazado: { label: 'Rechazado', labelEn: 'Declined', cls: 'bg-rose-50 text-rose-700 ring-rose-200' },
 }
 

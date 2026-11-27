@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { formatCOP } from '../lib/format'
 import { tr } from '../lib/i18n'
-import type { Listing } from '../types'
+import type { Application, Listing } from '../types'
 import { PhotoSlideshow } from './PhotoSlideshow'
-import { Badge3D, Photo } from './ui'
+import { Badge3D, Photo, StatusPill } from './ui'
 
-export function ListingCard({ listing, fit }: { listing: Listing; fit?: boolean | null }) {
+export function ListingCard({ listing, fit, application }: { listing: Listing; fit?: boolean | null; application?: Application }) {
   const [idx, setIdx] = useState(0)
   const [showPhotos, setShowPhotos] = useState(false)
   const n = listing.photos.length
@@ -28,7 +28,9 @@ export function ListingCard({ listing, fit }: { listing: Listing; fit?: boolean 
           </button>
         )}
         <Badge3D className="pointer-events-none absolute left-3 top-3" />
-        {fit != null && (
+        {application ? (
+          <div className="pointer-events-none absolute right-3 top-3"><StatusPill status={application.status} /></div>
+        ) : fit != null && (
           <span
             className={`pointer-events-none absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${fit ? 'bg-emerald-600 text-white' : 'bg-white/95 text-stone-600'}`}
           >
@@ -66,9 +68,9 @@ export function ListingCard({ listing, fit }: { listing: Listing; fit?: boolean 
         <div className="mt-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h3 className="truncate font-bold text-stone-900">
-              {listing.barrio}, Bogotá
+              {listing.buildingName ?? `${listing.barrio}, Bogotá`}
             </h3>
-            <p className="truncate text-sm text-stone-500">{title}</p>
+            <p className="truncate text-sm text-stone-500">{listing.buildingName ? `${listing.barrio} · ${title}` : title}</p>
           </div>
           <span
             className="shrink-0 rounded-md bg-stone-100 px-1.5 py-0.5 text-xs font-bold text-stone-600"
@@ -87,6 +89,12 @@ export function ListingCard({ listing, fit }: { listing: Listing; fit?: boolean 
           <span className="font-bold">{formatCOP(listing.canon)}</span> <span className="text-sm text-stone-500">{tr(`/ month · HOA fee ${formatCOP(listing.administracion)}`, `/ mes · adm. ${formatCOP(listing.administracion)}`)}</span>
         </p>
       </a>
+      {(listing.availableUnits ?? 0) > 1 && <p className="mt-1 text-xs font-semibold text-teal-800">
+        {tr(`${listing.availableUnits} apartments available`, `${listing.availableUnits} apartamentos disponibles`)}
+      </p>}
+      {application?.status === 'aceptado' && <a href={`#/contrato/${application.id}`} className="mt-2 inline-block text-sm font-bold text-teal-800 underline underline-offset-4">
+        {tr('Review and sign lease', 'Revisar y firmar contrato')}
+      </a>}
       {showPhotos && <PhotoSlideshow photos={listing.photos} title={title} start={idx} onClose={() => setShowPhotos(false)} />}
     </article>
   )

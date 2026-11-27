@@ -93,7 +93,9 @@ export function describeRequirements(r: Requirements, canon: number) {
       detail:
         r.guarantee === 'poliza'
           ? tr('Approved by an insurer (El Libertador, SURA, Bolívar).', 'Aprobada por una aseguradora (El Libertador, SURA, Bolívar).')
-          : tr('A co-signer who owns property in Bogotá, or a policy approved by an insurer.', 'Codeudor con finca raíz en Bogotá o póliza aprobada por aseguradora.'),
+          : r.guarantee === 'codeudor_o_poliza'
+            ? tr('A co-signer who owns property in Bogotá, or a policy approved by an insurer.', 'Codeudor con finca raíz en Bogotá o póliza aprobada por aseguradora.')
+            : tr('The landlord does not require a co-signer or lease insurance.', 'El propietario no exige codeudor ni póliza de arrendamiento.'),
     },
     {
       key: 'credito',
@@ -175,19 +177,26 @@ export function evaluate(a: Applicant, l: Listing): Evaluation {
       : tr('Attach letters from previous jobs to show continuous employment.', 'Adjunta certificados de empleos anteriores para demostrar continuidad laboral.'),
   })
 
+  const noGuaranteeRequired = r.guarantee === 'ninguna'
   const guaranteeOk =
-    r.guarantee === 'ninguna' ||
+    noGuaranteeRequired ||
     (r.guarantee === 'poliza' && !!a.poliza) ||
     (r.guarantee === 'codeudor_o_poliza' && (!!a.poliza || !!a.codeudor))
   results.push({
     key: 'garantia',
-    label: r.guarantee === 'poliza' ? tr('Lease insurance policy', 'Póliza de arrendamiento') : tr('Co-signer or lease insurance', 'Codeudor o póliza'),
+    label: noGuaranteeRequired
+      ? tr('No additional guarantee', 'Sin garantía adicional')
+      : r.guarantee === 'poliza'
+        ? tr('Lease insurance policy', 'Póliza de arrendamiento')
+        : tr('Co-signer or lease insurance', 'Codeudor o póliza'),
     passed: guaranteeOk,
-    explanation: guaranteeOk
-      ? polizaOf(a) ?? tr(`Co-signer: ${codeudorOf(a)}`, `Codeudor: ${a.codeudor}`)
-      : r.guarantee === 'poliza' && a.codeudor
-        ? tr('You have a co-signer, but this landlord only accepts lease insurance.', 'Tienes codeudor, pero este propietario solo acepta póliza de arrendamiento.')
-        : tr('We found no co-signer or approved lease insurance policy.', 'No encontramos codeudor ni póliza de arrendamiento aprobada.'),
+    explanation: noGuaranteeRequired
+      ? tr('This listing does not require a co-signer or lease insurance.', 'Este inmueble no requiere codeudor ni póliza de arrendamiento.')
+      : guaranteeOk
+        ? polizaOf(a) ?? tr(`Co-signer: ${codeudorOf(a)}`, `Codeudor: ${a.codeudor}`)
+        : r.guarantee === 'poliza' && a.codeudor
+          ? tr('You have a co-signer, but this landlord only accepts lease insurance.', 'Tienes codeudor, pero este propietario solo acepta póliza de arrendamiento.')
+          : tr('We found no co-signer or approved lease insurance policy.', 'No encontramos codeudor ni póliza de arrendamiento aprobada.'),
     fix: guaranteeOk
       ? undefined
       : tr(
@@ -225,13 +234,15 @@ export function aiSummary(a: Applicant, l: Listing): string {
   const first = a.name.split(' ')[0]
   const ratio = formatRatio(ev.incomeRatio)
   if (getLang() === 'en') {
-    const guarantee = a.polizaEn ? a.polizaEn.replace('Pre-approved lease insurance · ', 'pre-approved lease insurance with ') : `a co-signer (${a.codeudorEn?.split(' · ')[0]})`
+    const guarantee = a.polizaEn ? a.polizaEn.replace('Pre-approved lease insurance · ', 'pre-approved lease insurance with ') : a.codeudorEn && `a co-signer (${a.codeudorEn.split(' · ')[0]})`
+    const guaranteeSummary = guarantee ? `The lease is backed by ${guarantee}.` : 'No guarantee was provided.'
     // Keep acronyms ("UX designer") as written; lowercase ordinary job titles.
     const acronym = /^[A-Z]{2}/.test(a.cargoEn)
     const role = acronym ? a.cargoEn : a.cargoEn.charAt(0).toLowerCase() + a.cargoEn.slice(1)
     const article = !acronym && /^[aeiou]/i.test(role) ? 'an' : 'a'
-    return `${first} is ${article} ${role} at ${a.employerEn.replace(' (contractor)', '')} ${contractPhraseEn[a.contract]} for ${tenureLabel(a.tenureMonths)}. Verified income covers ${ratio}× the rent, credit score is ${a.creditScore}, and the lease is backed by ${guarantee}.`
+    return `${first} is ${article} ${role} at ${a.employerEn.replace(' (contractor)', '')} ${contractPhraseEn[a.contract]} for ${tenureLabel(a.tenureMonths)}. Verified income covers ${ratio}× the rent, and their credit score is ${a.creditScore}. ${guaranteeSummary}`
   }
-  const guarantee = a.poliza ? a.poliza.replace('Póliza preaprobada · ', 'póliza preaprobada con ') : `codeudor (${a.codeudor?.split(' · ')[0]})`
-  return `${first} es ${a.cargo.charAt(0).toLowerCase() + a.cargo.slice(1)} en ${a.employer.replace(' (contratista)', '')} ${contractPhrase[a.contract]} desde hace ${tenureLabel(a.tenureMonths)}. Sus ingresos verificados cubren ${ratio}× el canon, tiene puntaje crediticio de ${a.creditScore} y respalda el contrato con ${guarantee}.`
+  const guarantee = a.poliza ? a.poliza.replace('Póliza preaprobada · ', 'póliza preaprobada con ') : a.codeudor && `codeudor (${a.codeudor.split(' · ')[0]})`
+  const guaranteeSummary = guarantee ? `El contrato cuenta con ${guarantee}.` : 'No presentó garantía.'
+  return `${first} es ${a.cargo.charAt(0).toLowerCase() + a.cargo.slice(1)} en ${a.employer.replace(' (contratista)', '')} ${contractPhrase[a.contract]} desde hace ${tenureLabel(a.tenureMonths)}. Sus ingresos verificados cubren ${ratio}× el canon, y su puntaje crediticio es ${a.creditScore}. ${guaranteeSummary}`
 }

@@ -26,15 +26,16 @@ export function Apply({ id }: { id: string }) {
   const listing = listings.find((l) => l.id === id)
   const me = applicants.find((a) => a.id === s.applicantId)!
   const hasConsent = !!s.consent[me.id]
+  const verified = s.verified.includes(me.id)
   const savedDocs = s.documents[me.id] ?? {}
-  const [step, setStep] = useState<Step>(hasConsent ? 'upload' : 'consent')
+  const [step, setStep] = useState<Step>(verified ? 'result' : hasConsent ? 'upload' : 'consent')
   const [consentChecked, setConsentChecked] = useState(hasConsent)
   const [docs, setDocs] = useState<Partial<Record<DocType, string>>>(savedDocs)
   const [reviewIdx, setReviewIdx] = useState(0)
 
   // Si cambia la persona demo, reiniciamos el flujo.
   useEffect(() => {
-    setStep(s.consent[me.id] ? 'upload' : 'consent')
+    setStep(s.verified.includes(me.id) ? 'result' : s.consent[me.id] ? 'upload' : 'consent')
     setConsentChecked(!!s.consent[me.id])
     setDocs(s.documents[me.id] ?? {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,8 +79,7 @@ export function Apply({ id }: { id: string }) {
   }
 
   const doApply = () => {
-    s.apply(listing.id)
-    navigate(`/aplicaciones?nueva=${listing.id}`)
+    if (s.apply(listing.id)) navigate(`/aplicaciones?nueva=${listing.id}`)
   }
 
   const stepNo = { consent: 1, upload: 2, review: 3, result: 3 }[step]
@@ -277,7 +277,10 @@ export function Apply({ id }: { id: string }) {
             </div>
           </div>
 
-          <h2 className="mt-7 text-lg font-bold">{tr('Data extracted from your documents', 'Datos extraídos de tus documentos')}</h2>
+          <h2 className="mt-7 text-lg font-bold">{tr('Profile data used in this review', 'Datos del perfil usados en esta revisión')}</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            {tr('EzRent compared these demo profile values with this listing’s requirements.', 'EzRent comparó estos datos del perfil de demostración con los requisitos de este inmueble.')}
+          </p>
           <div className="mt-3 rounded-2xl border border-stone-200 p-4">
             <div className="flex items-center gap-3 border-b border-stone-100 pb-3">
               <Avatar initials={me.initials} color={me.color} />
@@ -355,7 +358,10 @@ export function Apply({ id }: { id: string }) {
 
   function Missing() {
     const failed = ev.results.filter((r) => !r.passed)
-    const alternatives = listings.filter((l) => l.id !== listing!.id && evaluate(me, l).qualified).slice(0, 3)
+    const alternatives = listings
+      .filter((l) => l.id !== listing!.id && evaluate(me, l).qualified)
+      .sort((a, b) => (a.canon + a.administracion) - (b.canon + b.administracion))
+      .slice(0, 3)
     return (
       <div className="mt-7">
         <h2 className="text-lg font-bold">{tr('What you’re missing', 'Lo que te falta')}</h2>

@@ -1,4 +1,5 @@
 import type { Applicant, Application, Landlord, Listing, ManagedProperty, MonthRecord } from '../types'
+import { additionalListings } from './additionalListings'
 
 const img = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=70`
 
@@ -21,8 +22,34 @@ const P = {
 }
 
 export const landlords: Landlord[] = [
-  { id: 'l1', name: 'María Fernanda Castaño', initials: 'MC', since: '2025', phoneMasked: '+57 310 *** **42' },
-  { id: 'l2', name: 'Jorge Enrique Villamizar', initials: 'JV', since: '2026', phoneMasked: '+57 315 *** **07' },
+  {
+    id: 'l1',
+    name: 'María Fernanda Castaño',
+    initials: 'MC',
+    since: '2025',
+    phoneMasked: '+57 310 *** **42',
+    bio: 'Arriendo apartamentos en Teusaquillo, Chapinero y el centro de Bogotá. Coordino la entrega y el inventario con cada arrendatario.',
+    bioEn: 'I rent apartments in Teusaquillo, Chapinero and central Bogotá. I coordinate move-in and the inventory with each tenant.',
+  },
+  {
+    id: 'l2',
+    name: 'Jorge Enrique Villamizar',
+    initials: 'JV',
+    since: '2026',
+    phoneMasked: '+57 315 *** **07',
+    bio: 'Administro apartamentos familiares y conjuntos residenciales en el norte y occidente de Bogotá.',
+    bioEn: 'I manage family apartments and residential properties in northern and western Bogotá.',
+  },
+  {
+    id: 'l3',
+    name: 'Lucía Torres',
+    initials: 'LT',
+    since: '2026',
+    phoneMasked: '+57 312 *** **16',
+    operatorName: 'Torres Urbanas',
+    bio: 'Opero Torre Olaya y Torre Modelia. Mi equipo en cada edificio coordina la entrega de los apartamentos y atiende a los residentes.',
+    bioEn: 'I operate Torre Olaya and Torre Modelia. My on-site teams coordinate apartment handovers and support residents.',
+  },
 ]
 
 export const listings: Listing[] = [
@@ -242,6 +269,7 @@ export const listings: Listing[] = [
     requirements: { incomeMultiple: 2, contract: 'cualquiera', minTenureMonths: 6, guarantee: 'codeudor_o_poliza', minCreditScore: 580 },
     disponibleDesde: '2026-10-01',
   },
+  ...additionalListings,
 ]
 
 export const applicants: Applicant[] = [
@@ -381,15 +409,17 @@ export const seedApplications: Application[] = [
   { id: 'app-s2', listingId: 'cedritos-3h', applicantId: 'a1', status: 'rechazado', createdAt: '2026-09-10T10:00:00-05:00', note: 'El propietario eligió a otro aplicante preaprobado.', noteEn: 'The landlord chose another pre-approved applicant.' },
   // Otros aplicantes en el pipeline de los propietarios
   { id: 'app-s3', listingId: 'chapinero-alto-2h', applicantId: 'a3', status: 'preaprobado', createdAt: '2026-09-23T09:30:00-05:00' },
-  { id: 'app-s4', listingId: 'chapinero-alto-2h', applicantId: 'a2', status: 'preaprobado', createdAt: '2026-09-21T18:45:00-05:00' },
-  { id: 'app-s5', listingId: 'chapinero-alto-2h', applicantId: 'a4', status: 'preaprobado', createdAt: '2026-09-20T12:00:00-05:00' },
+  { id: 'app-s4', listingId: 'chapinero-alto-2h', applicantId: 'a2', status: 'rechazado', createdAt: '2026-09-21T18:45:00-05:00' },
+  { id: 'app-s5', listingId: 'chapinero-alto-2h', applicantId: 'a4', status: 'rechazado', createdAt: '2026-09-20T12:00:00-05:00' },
   { id: 'app-s6', listingId: 'teusaquillo-3h', applicantId: 'a3', status: 'preaprobado', createdAt: '2026-09-19T11:20:00-05:00' },
   { id: 'app-s7', listingId: 'la-soledad-2h', applicantId: 'a5', status: 'preaprobado', createdAt: '2026-09-24T08:05:00-05:00' },
-  { id: 'app-s8', listingId: 'la-soledad-2h', applicantId: 'a6', status: 'preaprobado', createdAt: '2026-09-18T20:40:00-05:00' },
+  { id: 'app-s8', listingId: 'la-soledad-2h', applicantId: 'a6', status: 'en_revision', createdAt: '2026-09-18T20:40:00-05:00' },
   { id: 'app-s9', listingId: 'galerias-1h', applicantId: 'a2', status: 'preaprobado', createdAt: '2026-09-17T16:15:00-05:00' },
   { id: 'app-s10', listingId: 'suba-3h', applicantId: 'a5', status: 'preaprobado', createdAt: '2026-09-22T10:30:00-05:00' },
   { id: 'app-s11', listingId: 'cedritos-3h', applicantId: 'a3', status: 'preaprobado', createdAt: '2026-09-16T14:00:00-05:00' },
-  { id: 'app-s12', listingId: 'suba-3h', applicantId: 'a6', status: 'preaprobado', createdAt: '2026-09-15T09:00:00-05:00' },
+  { id: 'app-s12', listingId: 'suba-3h', applicantId: 'a6', status: 'en_revision', createdAt: '2026-09-15T09:00:00-05:00' },
+  { id: 'app-s13', listingId: 'torre-olaya-1h', applicantId: 'a6', status: 'aceptado', createdAt: '2026-11-26T10:00:00-05:00' },
+  { id: 'app-s14', listingId: 'torre-modelia-2h', applicantId: 'a1', status: 'aceptado', createdAt: '2026-11-26T11:00:00-05:00' },
 ]
 
 // ---- Historial de flujo de caja (6 meses) ----
@@ -507,6 +537,24 @@ export const managedProperties: ManagedProperty[] = [
       luz: [104_600, 109_200, 101_800, 115_300, 108_400, 105_900],
       gas: [31_200, 33_800, 29_900, 35_600, 32_400, 31_700],
       agua: [0, 104_100, 0, 109_700, 0, 106_500],
+    }),
+  },
+  {
+    id: 'm6',
+    landlordId: 'l3',
+    name: 'Apto 402 · Torre Olaya',
+    barrio: 'Olaya',
+    tenantName: 'Mateo Gómez',
+    nameEn: 'Apt 402 · Torre Olaya',
+    tenantNameEn: 'Mateo Gómez',
+    canon: 1_300_000,
+    history: history({
+      canon: 1_300_000,
+      admin: 140_000,
+      predialAnual: 1_460_000,
+      luz: [74_300, 78_900, 81_400, 75_800, 79_100, 80_200],
+      gas: [24_800, 25_300, 25_900, 24_500, 26_100, 24_900],
+      agua: [0, 76_200, 0, 81_100, 0, 77_800],
     }),
   },
 ]

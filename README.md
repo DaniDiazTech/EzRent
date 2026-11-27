@@ -59,7 +59,7 @@ vercel --prod   # production deployment
 
 ## Demo path
 
-1. **Explorar**: browse 8 listings on the map and filter by barrio, precio, habitaciones, baños and parqueadero. Every card has a "Recorrido 3D" badge.
+1. **Explorar**: browse 18 listings on the map and filter by barrio, precio, habitaciones, baños and parqueadero. Every card has a "Recorrido 3D" badge.
 2. Open **Chapinero**, tour the 3D apartment (Vista general, Sala-comedor, Cocina, Habitación principal, Baño, Habitación 2). You can also tap a room's floor, or use **Cortar muros**.
 3. Click **Verificar si califico**, accept the habeas data consent (Ley 1581 de 2012), upload any files (or tap **Usar documentos de ejemplo**), then **Verificar requisitos** (Check requirements).
 4. After about 3.5 seconds you see the extracted data and a pass/fail result for each requirement. The result says **Calificas**; click **Aplicar a este inmueble**.
@@ -68,6 +68,10 @@ vercel --prod   # production deployment
 7. Open **Flujo de caja**: 6 months of rent, automatic bill payments, fees, and net income per property, with a chart.
 
 Use the profile selector in the header to try other applicants. For example, *Camilo Herrera* (independiente, puntaje 574) does not qualify and sees what he is missing, plus listings where he would qualify. **Reiniciar demo** in the footer clears saved state.
+
+### Matching and signing demo
+
+Select **Santiago Pérez Luna** and open **My applications**. **Torre Olaya** is ready to sign. Review his screening report, open the operator profile, or sign the demo lease and see the status update. **Explore → Show my matches** ranks his eligible options and puts sign-ready applications first. Use **Laura Gómez Restrepo** on a different listing to demo document verification from the beginning. All records and signatures are simulated and saved in this browser.
 
 ## Seed data
 
@@ -82,7 +86,7 @@ Use the profile selector in the header to try other applicants. For example, *Ca
 | Salitre | 4 | 72 | 3 | $2.300.000 | $360.000 |
 | Suba | 3 | 64 | 3 | $1.650.000 | $210.000 |
 
-The seed also has 2 landlords, 6 applicants with different profiles, and 5 leased properties with 6 months (April to September 2026) of rent and bill history. The agent's review is deterministic: `src/lib/evaluate.ts` applies each landlord's rules to the current applicant's seeded profile.
+The seed has two landlords with eight listings each, plus a building operator with two buildings and 13 ready apartments. It also has 6 applicants with different profiles and 6 leased properties with 6 months (April to September 2026) of rent and bill history. The agent's review is deterministic: `src/lib/evaluate.ts` applies each landlord's rules to the current applicant's seeded profile.
 
 ## Project layout
 

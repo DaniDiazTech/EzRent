@@ -30,15 +30,18 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
       return { app: a, applicant, ev: evaluate(applicant, l) }
     })
     const qualified = withEval
-      .filter((x) => x.ev.qualified && x.app.status !== 'en_revision')
+      .filter((x) => x.app.status !== 'en_revision' && (x.ev.qualified || x.app.status === 'aceptado' || x.app.status === 'firmado'))
       .sort((a, b) => b.app.createdAt.localeCompare(a.app.createdAt))
-    const filtered = withEval.filter((x) => !x.ev.qualified).length
-    const verifying = withEval.filter((x) => x.ev.qualified && x.app.status === 'en_revision').length
-    return { qualified, filtered, verifying }
+    const filtered = withEval.filter((x) => !x.ev.qualified && x.app.status === 'rechazado').length
+    const verifying = withEval.filter((x) => x.app.status === 'en_revision').length
+    const preApproved = qualified.filter(({ app }) => app.status === 'preaprobado').length
+    const readyToSign = qualified.filter(({ app }) => app.status === 'aceptado').length
+    const signed = qualified.filter(({ app }) => app.status === 'firmado').length
+    return { qualified, filtered, verifying, preApproved, readyToSign, signed }
   }
 
   const current = byListing(listing.id)
-  const newestId = current.qualified[0]?.app.id
+  const newestId = current.qualified.find(({ app }) => app.status === 'preaprobado')?.app.id
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -53,6 +56,9 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
             )}
           </p>
         </div>
+        <a href={`#/arrendador/${landlord.id}`} className="text-sm font-bold text-teal-800 underline underline-offset-4">
+          {tr('View landlord profile', 'Ver perfil del arrendador')}
+        </a>
       </div>
 
       {/* Selector de inmueble */}
@@ -68,11 +74,13 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
             >
               <Photo src={p.photos[0]} alt={tr(p.titleEn, p.title)} className="h-14 w-16 shrink-0 rounded-xl" />
               <div className="min-w-0">
-                <div className="truncate font-bold">{p.barrio}</div>
+                <div className="truncate font-bold">{p.buildingName ?? p.barrio}</div>
                 <div className="text-xs text-stone-500">
                   {tr(`${p.habitaciones} bd`, `${p.habitaciones} hab`)} · {formatCOP(p.canon)}
                 </div>
-                <div className="mt-0.5 text-xs font-bold text-teal-700">{c.qualified.length} {c.qualified.length === 1 ? tr('pre-approved', 'preaprobado') : tr('pre-approved', 'preaprobados')}</div>
+                <div className="mt-0.5 text-xs font-bold text-teal-700">
+                  {c.readyToSign ? tr(`${c.readyToSign} ready to sign`, `${c.readyToSign} para firmar`) : tr(`${c.preApproved} pre-approved`, `${c.preApproved} preaprobados`)}
+                </div>
               </div>
             </button>
           )
@@ -82,7 +90,9 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="rounded-full bg-teal-700 px-3 py-1 font-bold text-white">{current.qualified.length} {current.qualified.length === 1 ? tr('pre-approved', 'preaprobado') : tr('pre-approved', 'preaprobados')}</span>
+            <span className="rounded-full bg-teal-700 px-3 py-1 font-bold text-white">{current.preApproved} {current.preApproved === 1 ? tr('pre-approved', 'preaprobado') : tr('pre-approved', 'preaprobados')}</span>
+            {current.readyToSign > 0 && <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-800">{tr(`${current.readyToSign} ready to sign`, `${current.readyToSign} para firmar`)}</span>}
+            {current.signed > 0 && <span className="rounded-full bg-stone-100 px-3 py-1 font-semibold text-stone-800">{tr(`${current.signed} signed`, `${current.signed} firmados`)}</span>}
             {current.filtered > 0 && (
               <span className="rounded-full bg-stone-100 px-3 py-1 font-semibold text-stone-600">{tr(
                   `${current.filtered} automatically screened out for not meeting requirements`,
@@ -139,8 +149,8 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
                     <Mini label={tr('Contract', 'Contrato')} value={contractLabel(applicant.contract)} sub={tenureLabel(applicant.tenureMonths)} />
                     <Mini
                       label={tr('Guarantee', 'Garantía')}
-                      value={applicant.poliza ? tr('Lease insurance', 'Póliza') : tr('Co-signer', 'Codeudor')}
-                      sub={applicant.poliza ? polizaOf(applicant)!.split(' · ')[1] : tr('Owns property', 'Con finca raíz')}
+                      value={applicant.poliza ? tr('Lease insurance', 'Póliza') : applicant.codeudor ? tr('Co-signer', 'Codeudor') : tr('None provided', 'Sin garantía')}
+                      sub={applicant.poliza ? polizaOf(applicant)!.split(' · ')[1] : applicant.codeudor ? tr('Owns property', 'Con finca raíz') : tr('Based on the listing rules', 'Según los requisitos del inmueble')}
                     />
                     <Mini label={tr('Credit score', 'Puntaje')} value={String(applicant.creditScore)} sub={tr('No negative reports', 'Sin reportes')} />
                   </div>
@@ -156,7 +166,7 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
                   {app.status === 'preaprobado' ? (
                     <div className="mt-4 flex gap-2">
                       <Button onClick={() => s.setStatus(app.id, 'aceptado')} className="flex-1 sm:flex-none">
-                        {tr('Accept and book visit', 'Aceptar y agendar visita')}
+                        {tr('Accept and release lease', 'Aceptar y habilitar contrato')}
                       </Button>
                       <Button variant="danger" onClick={() => s.setStatus(app.id, 'rechazado')} className="flex-1 sm:flex-none">
                         {tr('Decline', 'Declinar')}
@@ -165,11 +175,12 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
                   ) : (
                     <div className="mt-4 flex items-center gap-3 text-sm">
                       <span className="text-stone-600">{app.status === 'aceptado'
-                          ? tr('Accepted. We sent a visit invitation and the digital lease.', 'Aceptado. Enviamos invitación a visita y contrato digital.')
+                          ? tr('The lease is ready for the tenant to review and sign.', 'El contrato está listo para que el arrendatario lo revise y firme.')
+                          : app.status === 'firmado' ? tr('The tenant signed the demo lease.', 'El arrendatario firmó el contrato de demostración.')
                           : tr('Declined. We notified the applicant.', 'Declinado. Notificamos al aplicante.')}</span>
-                      <button onClick={() => s.setStatus(app.id, 'preaprobado')} className="font-semibold text-teal-700 underline">
+                      {app.status !== 'firmado' && <button onClick={() => s.setStatus(app.id, 'preaprobado')} className="font-semibold text-teal-700 underline">
                         {tr('Undo', 'Deshacer')}
-                      </button>
+                      </button>}
                     </div>
                   )}
                 </li>
@@ -202,7 +213,7 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
               </li>
               <li>
                 • {tr('Guarantee:', 'Garantía:')}{' '}
-                {listing.requirements.guarantee === 'poliza' ? tr('lease insurance', 'póliza') : tr('co-signer or lease insurance', 'codeudor o póliza')}
+                {listing.requirements.guarantee === 'ninguna' ? tr('none required', 'no se exige') : listing.requirements.guarantee === 'poliza' ? tr('lease insurance', 'póliza') : tr('co-signer or lease insurance', 'codeudor o póliza')}
               </li>
               <li>
                 • {tr('Credit score', 'Puntaje')} ≥ {listing.requirements.minCreditScore}
