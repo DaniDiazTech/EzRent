@@ -50,13 +50,23 @@ export function CashFlow() {
   const landlord = landlords.find((l) => l.id === s.landlordId)!
   const props = managedProperties.filter((p) => p.landlordId === landlord.id)
   const [propId, setPropId] = useState<string>('all')
-  const scope = propId === 'all' ? props : props.filter((p) => p.id === propId)
+  const activeId = props.some((property) => property.id === propId) ? propId : 'all'
+  const scope = activeId === 'all' ? props : props.filter((p) => p.id === activeId)
   const series = useMemo(() => aggregate(scope), [scope])
   const last = series[series.length - 1]
   const sixNet = series.reduce((s, m) => s + m.net, 0)
   const sixFees = series.reduce((s, m) => s + m.fees, 0)
   const sixBills = series.reduce((s, m) => s + m.count, 0)
-  const lastMonth = last?.month
+  if (!last) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <h1 className="text-3xl font-extrabold">{tr('Cash flow', 'Flujo de caja')}</h1>
+        <p className="mt-3 text-stone-600">{tr('There is no rent payment history for this profile yet.', 'Este perfil aún no tiene historial de pagos de arriendo.')}</p>
+        <a href="#/propietario" className="mt-4 inline-block font-bold text-teal-800 underline">{tr('Back to applicants', 'Volver a aplicantes')}</a>
+      </div>
+    )
+  }
+  const lastMonth = last.month
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -74,7 +84,7 @@ export function CashFlow() {
           <button
             key={p.id}
             onClick={() => setPropId(p.id)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 ${propId === p.id ? 'bg-stone-900 text-white ring-stone-900' : 'bg-white text-stone-700 ring-stone-300 hover:bg-stone-50'}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 ${activeId === p.id ? 'bg-stone-900 text-white ring-stone-900' : 'bg-white text-stone-700 ring-stone-300 hover:bg-stone-50'}`}
           >
             {tr(p.nameEn, p.name)}
           </button>

@@ -4,6 +4,8 @@ import { Header } from './components/Header'
 import { Applications } from './pages/Applications'
 import { Apply } from './pages/Apply'
 import { CashFlow } from './pages/CashFlow'
+import { LandlordProfile } from './pages/LandlordProfile'
+import { Lease } from './pages/Lease'
 import { ListingDetail } from './pages/ListingDetail'
 import { Listings } from './pages/Listings'
 import { Pipeline } from './pages/Pipeline'
@@ -29,15 +31,19 @@ export default function App() {
 
   let page
   let m
-  if ((m = match('/inmueble/:id', path))) page = <ListingDetail key={m.id} id={m.id} />
+  if ((m = match('/inmueble/:id', path))) page = <ListingDetail key={m.id} id={m.id} showTour={query(path).get('vista') === 'recorrido'} />
   else if ((m = match('/aplicar/:id', path))) page = <Apply key={m.id} id={m.id} />
+  else if ((m = match('/arrendador/:id', path))) page = <LandlordProfile key={m.id} id={m.id} />
+  else if ((m = match('/contrato/:id', path))) page = <Lease key={m.id} id={m.id} />
   else if (match('/aplicaciones', path)) page = <Applications highlight={query(path).get('nueva') ?? undefined} />
   else if (match('/propietario', path)) page = <Pipeline initialListing={query(path).get('inmueble') ?? undefined} />
   else if (match('/propietario/flujo', path)) page = <CashFlow />
   else {
-    const nearbyId = query(path).get('cerca')
+    const params = query(path)
+    const nearbyId = params.get('cerca')
+    const onlyMatches = params.get('coincidencias') === '1'
     const nearby = listings.find((listing) => listing.id === nearbyId)
-    page = <Listings key={nearby?.id ?? 'all'} nearby={nearby} />
+    page = <Listings key={nearby?.id ?? (onlyMatches ? 'matches' : 'all')} nearby={nearby} onlyMatches={onlyMatches} />
   }
 
   return (

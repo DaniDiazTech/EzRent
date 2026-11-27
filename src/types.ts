@@ -38,6 +38,9 @@ export interface Listing {
   antiguedadAnos: number
   photos: string[]
   landlordId: string
+  buildingName?: string
+  /** Apartments with this floor plan available in the building. */
+  availableUnits?: number
   description: string
   amenities: string[]
   /** English copy. The Spanish fields above stay as the original content. */
@@ -54,6 +57,9 @@ export interface Landlord {
   initials: string
   since: string
   phoneMasked: string
+  operatorName?: string
+  bio?: string
+  bioEn?: string
 }
 
 export interface Applicant {
@@ -78,7 +84,7 @@ export interface Applicant {
   polizaEn: string | null
 }
 
-export type ApplicationStatus = 'en_revision' | 'preaprobado' | 'aceptado' | 'rechazado'
+export type ApplicationStatus = 'en_revision' | 'preaprobado' | 'aceptado' | 'firmado' | 'rechazado'
 
 export interface Application {
   id: string
@@ -86,6 +92,7 @@ export interface Application {
   applicantId: string
   status: ApplicationStatus
   createdAt: string
+  signedAt?: string
   note?: string
   noteEn?: string
 }

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useRef } from 'react'
+import { Component, lazy, Suspense, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { ListingGallery } from '../components/ListingGallery'
 import { RentalMap } from '../components/RentalMap'
 import { Badge3D, Button, Check, Spec, StatusPill } from '../components/ui'
@@ -12,10 +12,37 @@ import type { Listing } from '../types'
 
 const Tour = lazy(() => import('../tour/Tour'))
 
-export function ListingDetail({ id }: { id: string }) {
+class TourBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  render() {
+    return this.state.failed
+      ? <p role="status" className="grid h-full place-items-center bg-stone-100 p-6 text-center text-sm text-stone-700">
+        {tr('The 3D tour could not load on this device. The photo gallery is available above.', 'El recorrido 3D no pudo cargarse en este dispositivo. Puedes ver la galería de fotos arriba.')}
+      </p>
+      : this.props.children
+  }
+}
+
+export function ListingDetail({ id, showTour }: { id: string; showTour: boolean }) {
   const s = useStore()
   const locationSection = useRef<HTMLElement>(null)
+  const tourSection = useRef<HTMLElement>(null)
   const listing = listings.find((l) => l.id === id)
+
+  function openTour() {
+    tourSection.current?.scrollIntoView()
+    tourSection.current?.focus({ preventScroll: true })
+  }
+
+  useEffect(() => {
+    if (showTour) openTour()
+  }, [showTour])
+
   if (!listing)
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
@@ -46,33 +73,41 @@ export function ListingDetail({ id }: { id: string }) {
           `${listing.barrio} · Localidad de ${listing.localidad} · Bogotá D.C. · Estrato ${listing.estrato}`,
         )}
       </p>
-      <button type="button" className="mt-2 text-sm font-bold text-teal-800 underline underline-offset-4" onClick={() => {
-        locationSection.current?.scrollIntoView()
-        locationSection.current?.focus({ preventScroll: true })
-      }}>
-        {tr('See location on map', 'Ver ubicación en el mapa')}
-      </button>
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+        <button type="button" onClick={openTour} className="text-sm font-bold text-teal-800 underline underline-offset-4">
+          {tr('See 3D tour', 'Ver recorrido 3D')}
+        </button>
+        <button type="button" className="text-sm font-bold text-teal-800 underline underline-offset-4" onClick={() => {
+          locationSection.current?.scrollIntoView()
+          locationSection.current?.focus({ preventScroll: true })
+        }}>
+          {tr('See location on map', 'Ver ubicación en el mapa')}
+        </button>
+      </div>
 
       <ListingGallery photos={listing.photos} title={tr(listing.titleEn, listing.title)} />
+      {listing.buildingName && <p className="mt-2 text-xs text-stone-500">{tr('Reference photos', 'Fotos de referencia')}</p>}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
         <div className="min-w-0">
           {/* Recorrido 3D */}
-          <section id="recorrido">
+          <section ref={tourSection} id="recorrido" tabIndex={-1} className="scroll-mt-32 outline-none" aria-labelledby="tour-title">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xl font-bold">{tr('Tour the apartment in 3D', 'Recorre el apartamento en 3D')}</h2>
+              <h2 id="tour-title" className="text-xl font-bold">{tr('Tour the apartment in 3D', 'Recorre el apartamento en 3D')}</h2>
               <Badge3D className="ring-1 ring-stone-200" />
             </div>
             <p className="mt-1 text-sm text-stone-600">
               {tr(
-                'Scanned model of the property. Jump between rooms or rotate freely to decide whether an in-person visit is worth it.',
-                'Modelo escaneado del inmueble. Pasa de un espacio a otro o gira libremente para decidir si vale la pena la visita presencial.',
+                'Explore the reference apartment. Jump between rooms or drag to rotate the model.',
+                'Explora el apartamento de referencia. Pasa de un espacio a otro o arrastra para girar el modelo.',
               )}
             </p>
             <div className="mt-4 h-[380px] overflow-hidden rounded-2xl ring-1 ring-stone-200 sm:h-[480px]">
-              <Suspense fallback={<div className="flex h-full items-center justify-center bg-stone-100 text-sm text-stone-500">{tr('Loading 3D tour…', 'Cargando recorrido 3D…')}</div>}>
-                <Tour />
-              </Suspense>
+              <TourBoundary>
+                <Suspense fallback={<div className="flex h-full items-center justify-center bg-stone-100 text-sm text-stone-500">{tr('Loading 3D tour…', 'Cargando recorrido 3D…')}</div>}>
+                  <Tour />
+                </Suspense>
+              </TourBoundary>
             </div>
             <p className="mt-2 text-xs text-stone-500">
               {tr(
@@ -97,6 +132,7 @@ export function ListingDetail({ id }: { id: string }) {
               <Spec label={tr('Neighborhood', 'Barrio')} value={listing.barrio} />
               <Spec label={tr('Building age', 'Antigüedad')} value={tr(`${listing.antiguedadAnos} years`, `${listing.antiguedadAnos} años`)} />
               <Spec label={tr('Available', 'Disponible')} value={formatDate(listing.disponibleDesde)} />
+              {listing.availableUnits && <Spec label={tr('Apartments available', 'Apartamentos disponibles')} value={listing.availableUnits} />}
               <Spec label={tr('Rent per m²', 'Valor m²')} value={formatCOP(Math.round(listing.canon / listing.areaM2))} />
             </div>
             <p className="mt-5 leading-relaxed text-stone-700">{tr(listing.descriptionEn, listing.description)}</p>
@@ -142,7 +178,9 @@ export function ListingDetail({ id }: { id: string }) {
             <div className="mt-6 flex items-center gap-3 rounded-2xl bg-stone-50 p-4">
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-800 font-bold text-white">{landlord.initials}</span>
               <div className="text-sm">
-                <div className="font-bold">{tr(`Listed by ${landlord.name}`, `Publicado por ${landlord.name}`)}</div>
+                <a href={`#/arrendador/${landlord.id}`} className="font-bold text-teal-800 underline underline-offset-4">
+                  {tr(`Listed by ${landlord.operatorName ?? landlord.name}`, `Publicado por ${landlord.operatorName ?? landlord.name}`)}
+                </a>
                 <div className="text-stone-600">
                   {tr(
                     `Verified EzRent landlord since ${landlord.since} · Rent collection and payments handled by the platform`,
@@ -178,6 +216,12 @@ export function ListingDetail({ id }: { id: string }) {
   )
 
   function CTA({ full }: { full?: boolean }) {
+    if (existing?.status === 'aceptado' || existing?.status === 'firmado')
+      return (
+        <Button className={full ? 'w-full' : ''} onClick={() => navigate(`/contrato/${existing.id}`)}>
+          {existing.status === 'firmado' ? tr('View signed lease', 'Ver contrato firmado') : tr('Review lease', 'Revisar contrato')}
+        </Button>
+      )
     if (existing)
       return (
         <Button variant="secondary" className={full ? 'w-full' : ''} onClick={() => navigate('/aplicaciones')}>
@@ -253,9 +297,9 @@ export function ListingDetail({ id }: { id: string }) {
         <div className="mt-4">
           <CTA full />
         </div>
-        <a href="#recorrido" className="mt-3 block text-center text-sm font-semibold text-teal-700 underline">
+        <button type="button" onClick={openTour} className="mt-3 block w-full text-center text-sm font-semibold text-teal-700 underline">
           {tr('See 3D tour', 'Ver recorrido 3D')}
-        </a>
+        </button>
         <p className="mt-4 text-center text-xs text-stone-500">
           {tr(
             'Applying is free. Your data is protected under Colombia’s Law 1581 of 2012 (habeas data).',

@@ -1,106 +1,106 @@
-import { Button, Photo, StatusPill } from '../components/ui'
-import { applicants, listings } from '../data/seed'
-import { evaluate } from '../lib/evaluate'
+import { Avatar, Button, Photo, StatusPill } from '../components/ui'
+import { applicants, landlords } from '../data/seed'
 import { formatCOP, formatRelative } from '../lib/format'
-import { getLang, tr } from '../lib/i18n'
+import { tr } from '../lib/i18n'
+import { matchPriority, rentalMatches } from '../lib/matches'
 import { navigate } from '../lib/router'
 import { useStore } from '../lib/store'
 
 const statusCopy = {
-  en_revision: 'Estamos validando tus documentos con el empleador. Te avisamos en menos de 24 h.',
-  preaprobado: 'Cumples todos los requisitos. El propietario ya ve tu perfil preaprobado y te responderá pronto.',
-  aceptado: '¡El propietario aceptó tu aplicación! Agenda la visita y firma el contrato digital.',
-  rechazado: 'El propietario no continuó con tu aplicación.',
-}
-
-const statusCopyEn: typeof statusCopy = {
-  en_revision: 'We’re verifying your documents with your employer. We’ll let you know within 24 h.',
-  preaprobado: 'You meet every requirement. The landlord can already see your pre-approved profile and will reply soon.',
-  aceptado: 'The landlord accepted your application! Book the visit and sign the digital lease.',
-  rechazado: 'The landlord did not move forward with your application.',
-}
+  en_revision: ['Your application is being reviewed.', 'Tu aplicación está en revisión.'],
+  preaprobado: ['The landlord can review your pre-approved profile. You’ll be able to sign when they accept.', 'El arrendador puede revisar tu perfil preaprobado. Podrás firmar cuando te acepte.'],
+  aceptado: ['The landlord accepted your application. Review the lease and sign when you’re ready.', 'El arrendador aceptó tu aplicación. Revisa el contrato y firma cuando estés listo.'],
+  firmado: ['Your demo lease was signed.', 'Firmaste el contrato de demostración.'],
+  rechazado: ['The landlord did not move forward with your application.', 'El arrendador no continuó con tu aplicación.'],
+} as const
 
 export function Applications({ highlight }: { highlight?: string }) {
   const s = useStore()
-  const me = applicants.find((a) => a.id === s.applicantId)!
-  const mine = s.applications.filter((a) => a.applicantId === me.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const me = applicants.find((applicant) => applicant.id === s.applicantId)!
+  const verified = s.verified.includes(me.id)
+  const matches = rentalMatches(me, s.applications)
+  const mine = matches.flatMap(({ listing, application }) => application ? [{ listing, application }] : [])
+    .sort((a, b) => Number(b.application.status === 'aceptado') - Number(a.application.status === 'aceptado')
+      || b.application.createdAt.localeCompare(a.application.createdAt))
+  const ready = mine.filter(({ application }) => application.status === 'aceptado')
+  const recommendations = matches.filter((match) => matchPriority(match, verified) >= 2).length
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <h1 className="text-3xl font-extrabold tracking-tight">{tr('My applications', 'Mis aplicaciones')}</h1>
       <p className="mt-1 text-stone-600">
-        {tr(
-          `Hi, ${me.name.split(' ')[0]}. Here’s the status of every place you applied to.`,
-          `Hola, ${me.name.split(' ')[0]}. Aquí ves el estado de cada inmueble al que aplicaste.`,
-        )}
+        {tr(`Hi, ${me.name.split(' ')[0]}. Track your applications and pick up where you left off.`, `Hola, ${me.name.split(' ')[0]}. Consulta tus aplicaciones y retoma el proceso donde lo dejaste.`)}
       </p>
 
-      {highlight && mine.some((a) => a.listingId === highlight) && (
-        <div className="mt-5 animate-fade-up rounded-2xl bg-emerald-600 p-4 text-white shadow-lg">
-          <div className="font-bold">{tr('Application sent!', '¡Aplicación enviada!')}</div>
-          <div className="text-sm text-emerald-50">
-            {getLang() === 'es' ? (
-              <>
-                Ya estás de primero en la lista del propietario como aplicante preaprobado. Cambia a <strong>Propietario</strong> arriba para verlo desde el otro lado.
-              </>
-            ) : (
-              <>
-                You’re now at the top of the landlord’s list as a pre-approved applicant. Switch to <strong>Landlord</strong> above to see it from the other side.
-              </>
-            )}
-          </div>
+      <div className="mt-5 grid gap-3 rounded-2xl border border-teal-100 bg-teal-50/70 p-4 sm:grid-cols-3 sm:p-5">
+        <div>
+          <p className="text-xl font-extrabold text-teal-900">{ready.length}</p>
+          <p className="text-sm font-semibold text-teal-800">{tr('Ready to sign', 'Listos para firmar')}</p>
         </div>
+        <div>
+          <p className="text-xl font-extrabold text-teal-900">{mine.length}</p>
+          <p className="text-sm font-semibold text-teal-800">{tr('Applications', 'Aplicaciones')}</p>
+        </div>
+        <div>
+          <a href={verified ? '#/?coincidencias=1' : '#/'} className="text-sm font-bold text-teal-800 underline underline-offset-4">
+            {verified ? tr(`See matches (${recommendations})`, `Ver coincidencias (${recommendations})`) : tr('Explore rentals', 'Explorar arriendos')}
+          </a>
+        </div>
+      </div>
+
+      {highlight && mine.some(({ listing }) => listing.id === highlight) && (
+        <p role="status" className="mt-5 rounded-xl bg-emerald-600 p-4 font-bold text-white">{tr('Application sent!', '¡Aplicación enviada!')}</p>
       )}
 
       {mine.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-stone-300 p-10 text-center">
+        <div className="mt-8 rounded-2xl border border-dashed border-stone-300 p-8 text-center">
           <p className="text-stone-600">{tr('You haven’t applied to any place yet.', 'Aún no has aplicado a ningún inmueble.')}</p>
-          <Button className="mt-4" onClick={() => navigate('/')}>
-            {tr('Explore places', 'Explorar inmuebles')}
-          </Button>
+          <Button className="mt-4" onClick={() => navigate('/')} >{tr('Explore places', 'Explorar inmuebles')}</Button>
         </div>
       ) : (
         <ul className="mt-6 space-y-4">
-          {mine.map((a) => {
-            const l = listings.find((x) => x.id === a.listingId)!
-            const ev = evaluate(me, l)
+          {mine.map(({ application, listing }) => {
+            const owner = landlords.find((landlord) => landlord.id === listing.landlordId)
+            const readyToSign = application.status === 'aceptado'
+            const note = application.status === 'en_revision' || application.status === 'rechazado' ? tr(application.noteEn, application.note) : undefined
+            const [statusEn, statusEs] = statusCopy[application.status]
             return (
-              <li
-                key={a.id}
-                className={`flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center ${a.listingId === highlight ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-stone-200'}`}
-              >
-                <a href={`#/inmueble/${l.id}`} className="shrink-0">
-                  <Photo src={l.photos[0]} alt={tr(l.titleEn, l.title)} className="h-32 w-full rounded-xl sm:h-24 sm:w-32" />
+              <li key={application.id} className={`grid gap-4 rounded-2xl border p-4 sm:grid-cols-[10rem_minmax(0,1fr)] ${readyToSign || listing.id === highlight ? 'border-teal-400 bg-teal-50/30' : 'border-stone-200'}`}>
+                <a href={`#/inmueble/${listing.id}`}>
+                  <Photo src={listing.photos[0]} alt={tr(listing.titleEn, listing.title)} className="h-40 w-full rounded-xl sm:h-32" />
                 </a>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <a href={`#/inmueble/${l.id}`} className="font-bold hover:underline">
-                      {l.barrio} · {tr(`${l.habitaciones} bd`, `${l.habitaciones} hab`)} · {l.areaM2} m²
-                    </a>
-                    <StatusPill status={a.status} />
+                    <a href={`#/inmueble/${listing.id}`} className="font-extrabold hover:underline">{listing.buildingName ?? tr(listing.titleEn, listing.title)}</a>
+                    <StatusPill status={application.status} />
                   </div>
-                  <div className="mt-0.5 text-sm text-stone-600">
+                  <p className="mt-1 text-sm text-stone-600">
                     {tr(
-                      `${formatCOP(l.canon)} / month · Applied ${formatRelative(a.createdAt)} · You meet ${ev.passedCount}/${ev.results.length} requirements`,
-                      `${formatCOP(l.canon)} / mes · Aplicaste ${formatRelative(a.createdAt)} · Cumples ${ev.passedCount}/${ev.results.length} requisitos`,
+                      `${listing.barrio} · ${formatCOP(listing.canon + listing.administracion)} / month with fees · Applied ${formatRelative(application.createdAt)}`,
+                      `${listing.barrio} · ${formatCOP(listing.canon + listing.administracion)} / mes con administración · Aplicaste ${formatRelative(application.createdAt)}`,
                     )}
+                  </p>
+                  <p className="mt-2 text-sm text-stone-700">{note ?? tr(statusEn, statusEs)}</p>
+                  {(readyToSign || application.status === 'firmado') && (
+                    <Button className="mt-3" onClick={() => navigate(`/contrato/${application.id}`)}>
+                      {readyToSign ? tr('Review and sign lease', 'Revisar y firmar contrato') : tr('View signed lease', 'Ver contrato firmado')}
+                    </Button>
+                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-stone-200 pt-3 text-sm font-semibold text-teal-800">
+                    {owner && <a href={`#/arrendador/${owner.id}`} className="inline-flex items-center gap-2 hover:underline">
+                      <Avatar initials={owner.initials} color="#115e59" size={26} />
+                      <span>{owner.operatorName ?? owner.name}</span>
+                      <span className="font-normal underline underline-offset-2">{tr('View profile', 'Ver perfil')}</span>
+                    </a>}
+                    <a href={`#/inmueble/${listing.id}?vista=recorrido`} className="underline underline-offset-4">{tr('See 3D tour', 'Ver recorrido 3D')}</a>
+                    {verified && <a href={`#/aplicar/${listing.id}`} className="underline underline-offset-4">{tr('See what we used', 'Ver qué datos usamos')}</a>}
                   </div>
-                  <p className="mt-2 text-sm text-stone-700">{tr(a.noteEn, a.note) ?? tr(statusCopyEn, statusCopy)[a.status]}</p>
                 </div>
               </li>
             )
           })}
         </ul>
       )}
-
-      <div className="mt-8 grid gap-3 text-sm sm:grid-cols-3">
-        {(['en_revision', 'preaprobado', 'rechazado'] as const).map((st) => (
-          <div key={st} className="rounded-2xl bg-stone-50 p-4">
-            <StatusPill status={st} />
-            <p className="mt-2 text-stone-600">{tr(statusCopyEn, statusCopy)[st]}</p>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

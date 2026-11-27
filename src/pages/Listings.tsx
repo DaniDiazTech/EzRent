@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react'
 import { ListingCard } from '../components/ListingCard'
 import { ListingMapSearch } from '../components/ListingMapSearch'
 import { applicants, listings } from '../data/seed'
-import { evaluate } from '../lib/evaluate'
+import { formatCOP } from '../lib/format'
 import { tr } from '../lib/i18n'
 import { inBounds, inPolygon, type MapBounds, type MapPoint } from '../lib/mapArea'
+import { matchPriority, rentalMatches } from '../lib/matches'
 import { useStore } from '../lib/store'
 import type { Listing } from '../types'
 
@@ -20,16 +21,16 @@ const PRICE_STEPS = [
 ]
 const monthlyCost = (listing: Listing) => listing.canon + listing.administracion
 
-export function Listings({ nearby }: { nearby?: Listing }) {
+export function Listings({ nearby, onlyMatches }: { nearby?: Listing; onlyMatches: boolean }) {
   const s = useStore()
   const [barrio, setBarrio] = useState('')
   const [price, setPrice] = useState(0)
   const [rooms, setRooms] = useState(0)
   const [baths, setBaths] = useState(0)
   const [parking, setParking] = useState(false)
-  const [onlyFit, setOnlyFit] = useState(false)
+  const [onlyFit, setOnlyFit] = useState(onlyMatches)
   const [sort, setSort] = useState('')
-  const [view, setView] = useState<'map' | 'list'>('map')
+  const [view, setView] = useState<'map' | 'list'>(onlyMatches ? 'list' : 'map')
   const [selectedId, setSelectedId] = useState(nearby?.id ?? '')
   const [highlighted, setHighlighted] = useState('')
   const [focus, setFocus] = useState(nearby ? [nearby.mapLocation] : CITY)
@@ -40,7 +41,15 @@ export function Listings({ nearby }: { nearby?: Listing }) {
   const me = applicants.find((a) => a.id === s.applicantId)!
   const verified = s.verified.includes(me.id)
   const filterByQualification = verified && onlyFit
-  const fits = useMemo(() => new Set(listings.filter((listing) => evaluate(me, listing).qualified).map((listing) => listing.id)), [me])
+  const matches = useMemo(() => rentalMatches(me, s.applications), [me, s.applications])
+  const byId = useMemo(() => new Map(matches.map((match) => [match.listing.id, match])), [matches])
+  const priorities = useMemo(() => new Map(matches.map((match) => [match.listing.id, matchPriority(match, verified)])), [matches, verified])
+  const matchCount = matches.filter((match) => (priorities.get(match.listing.id) ?? 0) >= 2).length
+  const ready = matches.filter(({ application }) => application?.status === 'aceptado')
+  const closest = verified && !matchCount
+    ? matches.filter(({ application }) => !application).sort((a, b) =>
+      b.result.passedCount - a.result.passedCount || monthlyCost(a.listing) - monthlyCost(b.listing)).slice(0, 3)
+    : []
 
   const filtered = useMemo(() => listings.filter((listing) =>
     (!barrio || listing.barrio === barrio) &&
@@ -48,8 +57,8 @@ export function Listings({ nearby }: { nearby?: Listing }) {
     listing.habitaciones >= rooms &&
     listing.banos >= baths &&
     (!parking || listing.parqueaderos > 0) &&
-    (!filterByQualification || fits.has(listing.id)),
-  ), [barrio, price, rooms, baths, parking, filterByQualification, fits])
+    (!filterByQualification || (priorities.get(listing.id) ?? 0) >= 2),
+  ), [barrio, price, rooms, baths, parking, filterByQualification, priorities])
   const inArea = useMemo(() => filtered.filter((listing) =>
     (!area.length || inPolygon(listing.mapLocation, area)) &&
     (!visibleOnly || !bounds || inBounds(listing.mapLocation, bounds)),
@@ -57,8 +66,8 @@ export function Listings({ nearby }: { nearby?: Listing }) {
   const results = useMemo(() => {
     if (sort === 'low') return [...inArea].sort((a, b) => monthlyCost(a) - monthlyCost(b))
     if (sort === 'high') return [...inArea].sort((a, b) => monthlyCost(b) - monthlyCost(a))
-    return inArea
-  }, [inArea, sort])
+    return [...inArea].sort((a, b) => (priorities.get(b.id) ?? 0) - (priorities.get(a.id) ?? 0))
+  }, [inArea, sort, priorities])
 
   function reset() {
     setBarrio('')
@@ -72,6 +81,13 @@ export function Listings({ nearby }: { nearby?: Listing }) {
     setSelectedId('')
     setBounds(undefined)
     setFocus([...CITY])
+  }
+
+  function showMatches() {
+    reset()
+    setOnlyFit(true)
+    setView('list')
+    setSort('')
   }
 
   function selectNeighborhood(value: string) {
@@ -95,9 +111,19 @@ export function Listings({ nearby }: { nearby?: Listing }) {
           <p className="mt-2 text-sm text-stone-600 sm:text-base">
             {tr('Find your neighborhood, see where you qualify, and tour in 3D before visiting.', 'Encuentra tu barrio, revisa dónde calificas y recorre el inmueble en 3D antes de visitar.')}
           </p>
-          {verified && <p className="mt-3 text-sm font-bold text-teal-800">
-            {tr(`Documents verified · You qualify for ${fits.size} of ${listings.length} rentals`, `Documentos verificados · Calificas en ${fits.size} de ${listings.length} inmuebles`)}
-          </p>}
+          {(verified || ready.length > 0) && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-teal-900">
+              {ready.map(({ listing, application }) => (
+                <a key={listing.id} href={`#/contrato/${application!.id}`} className="rounded-xl bg-teal-800 px-3 py-2 font-bold text-white hover:bg-teal-900">
+                  {tr('Ready to sign', 'Listo para firmar')} · {listing.buildingName ?? listing.barrio}
+                </a>
+              ))}
+              {verified && <span className="font-semibold">{tr(`Verified profile · ${matchCount} ${matchCount === 1 ? 'match' : 'matches'}`, `Perfil verificado · ${matchCount} ${matchCount === 1 ? 'coincidencia' : 'coincidencias'}`)}</span>}
+              {verified && matchCount > 0 && (
+                <button type="button" className="font-bold underline underline-offset-4" onClick={showMatches}>{tr('Show my matches', 'Ver mis coincidencias')}</button>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -178,14 +204,37 @@ export function Listings({ nearby }: { nearby?: Listing }) {
                       if (!event.currentTarget.contains(event.relatedTarget)) setHighlighted('')
                     }}
                   >
-                    <ListingCard listing={listing} fit={verified ? fits.has(listing.id) : null} />
+                    <ListingCard
+                      listing={listing}
+                      fit={verified ? byId.get(listing.id)?.result.qualified : null}
+                      application={byId.get(listing.id)?.application}
+                    />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-stone-300 px-5 py-10 text-center">
-                <h3 className="font-extrabold">{tr('No rentals found', 'No encontramos inmuebles')}</h3>
-                <p className="mt-2 text-sm text-stone-600">{tr('Try a wider area or adjust your filters.', 'Prueba con una zona más amplia o ajusta los filtros.')}</p>
+                <h3 className="font-extrabold">{filterByQualification
+                  ? tr('No matches in this search', 'No hay coincidencias en esta búsqueda')
+                  : tr('No rentals found', 'No encontramos inmuebles')}</h3>
+                <p className="mt-2 text-sm text-stone-600">{filterByQualification && !matchCount
+                  ? tr('These rentals come closest to your verified profile. See each review for the requirements you still need to meet.', 'Estos inmuebles se acercan más a tu perfil verificado. Revisa qué requisitos te faltan en cada uno.')
+                  : tr('Try a wider area or adjust your filters.', 'Prueba con una zona más amplia o ajusta los filtros.')}</p>
+                {filterByQualification && closest.length > 0 && (
+                  <ul className="mt-4 space-y-2 text-left">
+                    {closest.map(({ listing, result }) => (
+                      <li key={listing.id}>
+                        <a href={`#/aplicar/${listing.id}`} className="block rounded-xl border border-stone-200 p-3 text-sm hover:bg-stone-50">
+                          <span className="block font-bold text-teal-800">{listing.buildingName ?? listing.barrio}</span>
+                          <span className="text-stone-600">{formatCOP(monthlyCost(listing))} · {tr(`${result.passedCount}/${result.results.length} requirements met`, `${result.passedCount}/${result.results.length} requisitos cumplidos`)}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {filterByQualification && matchCount > 0 && (
+                  <button type="button" onClick={showMatches} className="mt-4 mr-4 text-sm font-bold text-teal-800 underline">{tr('Show all my matches', 'Ver todas mis coincidencias')}</button>
+                )}
                 <button onClick={reset} className="mt-4 text-sm font-bold text-teal-800 underline">{tr('Reset search', 'Restablecer búsqueda')}</button>
               </div>
             )}

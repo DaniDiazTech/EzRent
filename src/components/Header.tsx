@@ -111,7 +111,7 @@ export function Header({ path }: { path: string }) {
               >
                 {landlords.map((l) => (
                   <option key={l.id} value={l.id}>
-                    🏠 {l.name}
+                    {l.operatorName ? `🏢 ${l.operatorName} · ${l.name}` : `🏠 ${l.name}`}
                   </option>
                 ))}
               </select>
@@ -137,10 +137,10 @@ export function Header({ path }: { path: string }) {
           className="ml-auto min-w-0 max-w-[45%] shrink truncate rounded-full border border-stone-200 bg-white px-2 py-1.5 text-xs font-semibold"
           aria-label={tr('Demo profile', 'Perfil demo')}
         >
-          {(s.role === 'arrendatario' ? applicants : landlords).map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
+          {s.role === 'arrendatario' ? applicants.map((applicant) => (
+            <option key={applicant.id} value={applicant.id}>{applicant.name}</option>
+          )) : landlords.map((landlord) => (
+            <option key={landlord.id} value={landlord.id}>{landlord.operatorName ?? landlord.name}</option>
           ))}
         </select>
       </div>
