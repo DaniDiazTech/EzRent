@@ -168,3 +168,35 @@ gmp-advanced-marker:hover .rental-pin {
   text-align: center;
   white-space: nowrap;
 }
+
+html:has(.photo-slideshow[open]) {
+  overflow: hidden;
+}
+
+.listing-gallery-tile:first-child {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+.listing-gallery-tile:not(:first-child) {
+  display: none;
+}
+
+@media (width >= 40rem) {
+  .listing-gallery-tile:first-child:not(:only-child) {
+    grid-column: span 2;
+  }
+
+  .listing-gallery-tile:not(:first-child) {
+    display: block;
+  }
+
+  .listing-gallery-tile:last-child:not(:first-child),
+  .listing-gallery-tile:nth-child(2):nth-last-child(2) {
+    grid-column: span 2;
+  }
+
+  .listing-gallery-tile:nth-child(2):last-child {
+    grid-row: span 2;
+  }
+}
