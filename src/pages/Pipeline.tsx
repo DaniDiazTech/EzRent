@@ -176,7 +176,7 @@ export function Pipeline({ initialListing }: { initialListing?: string }) {
                     <div className="mt-4 flex items-center gap-3 text-sm">
                       <span className="text-stone-600">{app.status === 'aceptado'
                           ? tr('The lease is ready for the tenant to review and sign.', 'El contrato está listo para que el arrendatario lo revise y firme.')
-                          : app.status === 'firmado' ? tr('The tenant signed the demo lease.', 'El arrendatario firmó el contrato de demostración.')
+                          : app.status === 'firmado' ? tr('The tenant signed the rental agreement.', 'El arrendatario firmó el contrato de arrendamiento.')
                           : tr('Declined. We notified the applicant.', 'Declinado. Notificamos al aplicante.')}</span>
                       {app.status !== 'firmado' && <button onClick={() => s.setStatus(app.id, 'preaprobado')} className="font-semibold text-teal-700 underline">
                         {tr('Undo', 'Deshacer')}

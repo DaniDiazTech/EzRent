@@ -86,6 +86,25 @@ export interface Applicant {
 
 export type ApplicationStatus = 'en_revision' | 'preaprobado' | 'aceptado' | 'firmado' | 'rechazado'
 
+export type LeaseSignature = { kind: 'drawn'; png: string } | { kind: 'typed'; name: string }
+
+export interface LeaseTerms {
+  property: string
+  neighborhood: string
+  tenant: string
+  landlord: string
+  rent: number
+  fee: number
+  availableFrom: string
+  language: 'en' | 'es'
+}
+
+export interface SignedLease {
+  terms: LeaseTerms
+  signature: LeaseSignature
+  capturedAt: string
+}
+
 export interface Application {
   id: string
   listingId: string
@@ -93,6 +112,7 @@ export interface Application {
   status: ApplicationStatus
   createdAt: string
   signedAt?: string
+  signedLease?: SignedLease
   note?: string
   noteEn?: string
 }

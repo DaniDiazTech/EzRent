@@ -10,7 +10,7 @@ const statusCopy = {
   en_revision: ['Your application is being reviewed.', 'Tu aplicación está en revisión.'],
   preaprobado: ['The landlord can review your pre-approved profile. You’ll be able to sign when they accept.', 'El arrendador puede revisar tu perfil preaprobado. Podrás firmar cuando te acepte.'],
   aceptado: ['The landlord accepted your application. Review the lease and sign when you’re ready.', 'El arrendador aceptó tu aplicación. Revisa el contrato y firma cuando estés listo.'],
-  firmado: ['Your demo lease was signed.', 'Firmaste el contrato de demostración.'],
+  firmado: ['Your rental agreement was signed.', 'Firmaste el contrato de arrendamiento.'],
   rechazado: ['The landlord did not move forward with your application.', 'El arrendador no continuó con tu aplicación.'],
 } as const
 
